@@ -53,6 +53,12 @@ export class LineService {
                         },
                     );
 
+                    console.log('📸 LINE image debug');
+                    console.log('🔹 messageId:', messageId);
+                    console.log('🔹 response status:', imageResponse.status);
+                    console.log('🔹 response content-type:', imageResponse.headers['content-type']);
+                    console.log('🔹 content length:', imageResponse.data?.length);
+
                     if (!imageResponse.headers['content-type']?.startsWith('image/')) {
                         console.error('❌ LINE image API response is not image:', imageResponse.status);
                         return;
