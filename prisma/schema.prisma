@@ -1,0 +1,25 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Complaint {
+  id          String   @id @default(uuid())
+  lineUserId  String
+  description String
+  imageBefore String
+  imageAfter  String? // แนบรูปตอนเก็บเสร็จ
+  location    String?
+  status      ComplaintStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ComplaintStatus {
+  PENDING
+  DONE
+}
