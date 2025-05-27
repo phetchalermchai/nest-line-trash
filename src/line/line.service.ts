@@ -66,7 +66,9 @@ export class LineService {
 
                     const buffer = Buffer.from(imageResponse.data, 'binary');
                     const filename = `line-${randomUUID()}.jpg`;
+                    console.log('📤 Uploading image to Supabase...');
                     const imageUrl = await this.storageService.uploadImage(buffer, filename);
+                    console.log('✅ Uploaded image URL:', imageUrl);
 
                     await this.complaintService.createComplaint({
                         lineUserId,
@@ -74,11 +76,10 @@ export class LineService {
                         imageBefore: imageUrl,
                     });
                 } catch (err) {
-                    console.error('❌ Failed to load image from LINE API:', err.message);
+                    console.error('❌ Failed to upload image:', err.message);
                     if (err.response) {
-                        console.error('📦 Response status:', err.response.status);
-                        console.error('📦 Response headers:', err.response.headers);
-                        console.error('📦 Response body:', err.response.data?.toString());
+                        console.error('📦 Upload error status:', err.response.status);
+                        console.error('📦 Upload error headers:', err.response.headers);
                     }
                 }
             }
