@@ -14,6 +14,15 @@ export class LineService {
     async handleWebhook(body: any) {
         const events = body.events;
 
+        // ตอบ LINE ทันที แล้วแยก async ดำเนินการ
+        setTimeout(() => {
+            this.processEvents(events);
+        }, 0);
+
+        return { status: 'ok' };
+    }
+
+    private async processEvents(events: any[]) {
         for (const event of events) {
             const lineUserId = event.source?.userId;
 
@@ -60,10 +69,13 @@ export class LineService {
                     });
                 } catch (err) {
                     console.error('❌ Failed to load image from LINE API:', err.message);
+                    if (err.response) {
+                        console.error('📦 Response status:', err.response.status);
+                        console.error('📦 Response headers:', err.response.headers);
+                        console.error('📦 Response body:', err.response.data?.toString());
+                    }
                 }
             }
         }
-
-        return { status: 'ok' };
     }
 }
