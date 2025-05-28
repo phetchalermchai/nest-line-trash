@@ -32,4 +32,25 @@ export class ComplaintService {
             },
         });
     }
+
+    async updateStatus(id: string, status: ComplaintStatus) {
+        return this.prisma.complaint.update({
+            where: { id },
+            data: { status },
+        });
+    }
+
+    async updateImageAfter(id: string, imageAfter?: string) {
+        return this.prisma.complaint.update({
+            where: { id },
+            data: {
+                ...(imageAfter && { imageAfter }),
+                status: ComplaintStatus.DONE,
+            },
+        });
+    }
+
+    async findById(id: string) {
+        return this.prisma.complaint.findUnique({ where: { id } });
+    }
 }

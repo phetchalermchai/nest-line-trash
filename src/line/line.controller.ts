@@ -1,5 +1,6 @@
-import { Controller, Post, Req } from '@nestjs/common';
+import { Controller, Post, Patch, Param, Body, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { LineService } from './line.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('webhook/line')
 export class LineController {
@@ -8,5 +9,19 @@ export class LineController {
     @Post()
     handleWebhook(@Req() req: any) {
         return this.lineService.handleWebhook(req.body);
+    }
+
+    @Patch('complaints/:id/status')
+    updateStatus(@Param('id') id: string, @Body('status') status: string) {
+        return this.lineService.updateComplaintStatus(id, status);
+    }
+
+    @Post('complaints/:id/image-after')
+    @UseInterceptors(FileInterceptor('image'))
+    uploadImageAfter(
+        @Param('id') id: string,
+        @UploadedFile() file?: Express.Multer.File,
+    ) {
+        return this.lineService.uploadImageAfter(id, file);
     }
 }

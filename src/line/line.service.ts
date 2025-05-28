@@ -3,6 +3,7 @@ import { ComplaintService } from '../complaint/complaint.service';
 import { randomUUID } from 'crypto';
 import axios from 'axios';
 import { StorageService } from '../storage/storage.service';
+import { ComplaintStatus } from '@prisma/client';
 
 @Injectable()
 export class LineService {
@@ -13,25 +14,20 @@ export class LineService {
 
     async handleWebhook(body: any) {
         const events = body.events;
-
-        // ตอบ LINE ทันที แล้วแยก async ดำเนินการ
         setTimeout(() => {
             this.processEvents(events);
         }, 0);
-
         return { status: 'ok' };
     }
 
     private async processEvents(events: any[]) {
         for (const event of events) {
             console.log('🪵 LINE Event Received:', JSON.stringify(event, null, 2));
-
             const lineUserId = event.source?.userId;
 
             if (event.type === 'message' && event.message.type === 'text') {
                 const description = event.message.text;
-
-                await this.complaintService.createComplaint({
+                const complaint = await this.complaintService.createComplaint({
                     lineUserId,
                     description,
                     imageBefore: 'https://via.placeholder.com/400x300.png?text=รอ+แนบรูป',
@@ -39,25 +35,27 @@ export class LineService {
 
                 await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, {
                     type: 'text',
-                    text: `📌 เรื่องร้องเรียนใหม่\nจาก: ${lineUserId}\nเนื้อหา: ${description}`,
+                    text: `📌 เรื่องร้องเรียนใหม่
+🧾 ID: ${complaint.id}
+👤 ผู้แจ้ง: ${lineUserId}
+📝 รายละเอียด: ${description}
+📎 แนบรูป: ${complaint.imageBefore}`,
+                });
+
+                await this.replyToUser(event.replyToken, {
+                    type: 'text',
+                    text: `📬 ระบบได้รับเรื่องร้องเรียนของคุณแล้ว ขอบคุณมากครับ 🙏\nหมายเลขอ้างอิง: ${complaint.id}`,
                 });
             }
 
             if (event.type === 'message' && event.message.type === 'image') {
                 const messageId = event.message.id;
-
-                const headers = {
-                    Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`,
-                };
+                const headers = { Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}` };
 
                 try {
                     const imageResponse = await axios.get(
                         `https://api-data.line.me/v2/bot/message/${messageId}/content`,
-                        {
-                            headers,
-                            responseType: 'arraybuffer',
-                            validateStatus: () => true,
-                        },
+                        { headers, responseType: 'arraybuffer', validateStatus: () => true },
                     );
 
                     console.log('📸 LINE image debug');
@@ -77,7 +75,7 @@ export class LineService {
                     const imageUrl = await this.storageService.uploadImage(buffer, filename);
                     console.log('✅ Uploaded image URL:', imageUrl);
 
-                    await this.complaintService.createComplaint({
+                    const complaint = await this.complaintService.createComplaint({
                         lineUserId,
                         description: 'ภาพจากผู้ใช้ LINE',
                         imageBefore: imageUrl,
@@ -85,7 +83,15 @@ export class LineService {
 
                     await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, {
                         type: 'text',
-                        text: `📌 เรื่องร้องเรียนใหม่ (แนบภาพ)\nจาก: ${lineUserId}`,
+                        text: `📌 เรื่องร้องเรียนใหม่ (แนบภาพ)
+🧾 ID: ${complaint.id}
+👤 ผู้แจ้ง: ${lineUserId}
+📎 แนบรูป: ${imageUrl}`,
+                    });
+
+                    await this.replyToUser(event.replyToken, {
+                        type: 'text',
+                        text: `📬 ระบบได้รับภาพร้องเรียนของคุณแล้ว ขอบคุณครับ 🙏\nหมายเลขอ้างอิง: ${complaint.id}`,
                     });
                 } catch (err) {
                     console.error('❌ Failed to upload image:', err.message);
@@ -98,19 +104,88 @@ export class LineService {
         }
     }
 
+    async updateComplaintStatus(id: string, status: string) {
+        const updated = await this.complaintService.updateStatus(id, status as ComplaintStatus);
+        const userId = updated.lineUserId;
+
+        if (userId && status === 'RESOLVED') {
+            await this.pushMessageToUser(userId, {
+                type: 'text',
+                text: `✅ ปัญหาของคุณได้รับการดำเนินการเรียบร้อยแล้วครับ 🙌\nขอบคุณที่แจ้งเรื่องมานะครับ!`,
+            });
+        }
+
+        return updated;
+    }
+
     async pushMessageToGroup(groupId: string, message: any) {
         const headers = {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`,
         };
+        await axios.post('https://api.line.me/v2/bot/message/push', { to: groupId, messages: [message] }, { headers });
+    }
 
-        await axios.post(
-            'https://api.line.me/v2/bot/message/push',
-            {
-                to: groupId,
-                messages: [message],
-            },
-            { headers },
-        );
+    async replyToUser(replyToken: string, message: any) {
+        const headers = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`,
+        };
+        await axios.post('https://api.line.me/v2/bot/message/reply', { replyToken, messages: [message] }, { headers });
+    }
+
+    async pushMessageToUser(userId: string, message: any) {
+        const headers = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`,
+        };
+        await axios.post('https://api.line.me/v2/bot/message/push', { to: userId, messages: [message] }, { headers });
+    }
+
+    async uploadImageAfter(id: string, file?: Express.Multer.File) {
+        let imageUrl: string | undefined;
+        if (file) {
+            const buffer = file.buffer;
+            const filename = `after-${randomUUID()}.jpg`;
+            imageUrl = await this.storageService.uploadImage(buffer, filename);
+        }
+        await this.complaintService.updateImageAfter(id, imageUrl);
+
+        const complaint = await this.complaintService.findById(id);
+        if (complaint?.lineUserId) {
+            const messages: any[] = [
+                {
+                    type: 'text',
+                    text: '📌 การดำเนินการของคุณเสร็จสมบูรณ์แล้ว ขอบคุณที่แจ้งเรื่องเข้ามาครับ 🙏',
+                },
+            ];
+
+            if (imageUrl) {
+                messages.push({
+                    type: 'image',
+                    originalContentUrl: imageUrl,
+                    previewImageUrl: imageUrl,
+                });
+            }
+
+            await axios.post(
+                'https://api.line.me/v2/bot/message/push',
+                {
+                    to: complaint.lineUserId,
+                    messages,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+        }
+
+        return {
+            message: 'ดำเนินการอัปเดตสำเร็จ',
+            ...(imageUrl && { imageUrl }),
+        };
     }
 }
