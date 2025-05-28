@@ -4,11 +4,10 @@ import { StorageService } from '../storage/storage.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
 import { BadRequestException } from '@nestjs/common';
-import { LineService } from '../line/line.service';
 
 @Controller('complaints')
 export class ComplaintController {
-    constructor(private readonly complaintService: ComplaintService, private readonly storageService: StorageService, private readonly lineService: LineService) { }
+    constructor(private readonly complaintService: ComplaintService, private readonly storageService: StorageService,) { }
 
     @Post()
     @UseInterceptors(FilesInterceptor('images'))
@@ -31,11 +30,6 @@ export class ComplaintController {
             ...body,
             imageBefore: imageUrls.join(','),
         });
-    }
-
-    @Put(':id/notify')
-    async notifyGroup(@Param('id') id: string) {
-        return this.lineService.notifyGroupAboutComplaint(id);
     }
 
     @Put(':id/done')
