@@ -1,7 +1,7 @@
-import { Body, Controller, Param, Post, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Param, Post, Put, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { ComplaintService } from './complaint.service';
 import { StorageService } from '../storage/storage.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
 import { BadRequestException } from '@nestjs/common';
 
@@ -10,13 +10,26 @@ export class ComplaintController {
     constructor(private readonly complaintService: ComplaintService, private readonly storageService: StorageService,) { }
 
     @Post()
-    create(@Body() body: {
-        lineUserId: string;
-        description: string;
-        imageBefore: string;
-        location?: string;
-    }) {
-        return this.complaintService.createComplaint(body);
+    @UseInterceptors(FilesInterceptor('images'))
+    async create(
+        @UploadedFiles() files: Express.Multer.File[],
+        @Body() body: {
+            lineUserId: string;
+            description: string;
+            location?: string;
+        },
+    ) {
+        const imageUrls = await Promise.all(
+            files.map(async (file) => {
+                const filename = `complaint-${randomUUID()}.jpg`;
+                return await this.storageService.uploadImage(file.buffer, filename);
+            })
+        );
+
+        return this.complaintService.createComplaint({
+            ...body,
+            imageBefore: imageUrls.join(','),
+        });
     }
 
     @Put(':id/done')
@@ -25,8 +38,8 @@ export class ComplaintController {
     }
 
     @Post('upload')
-    @UseInterceptors(FileInterceptor('file'))
-    async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    @UseInterceptors(FilesInterceptor('file'))
+    async uploadImage(@UploadedFiles() file: Express.Multer.File) {
         if (!file) {
             throw new BadRequestException('Missing file');
         }
