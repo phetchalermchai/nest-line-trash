@@ -1,4 +1,4 @@
-import { Controller, Post, Patch, Param, Body, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Patch, Put, Param, Body, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { LineService } from './line.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -9,6 +9,11 @@ export class LineController {
     @Post()
     handleWebhook(@Req() req: any) {
         return this.lineService.handleWebhook(req.body);
+    }
+
+    @Put(':id/notify')
+    async notifyGroup(@Param('id') id: string) {
+        return this.lineService.notifyGroupAboutComplaint(id);
     }
 
     @Patch('complaints/:id/status')

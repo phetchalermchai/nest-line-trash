@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ComplaintService } from '../complaint/complaint.service';
 import { randomUUID } from 'crypto';
 import axios from 'axios';
@@ -103,6 +103,23 @@ export class LineService {
                 }
             }
         }
+    }
+
+    async notifyGroupAboutComplaint(id: string) {
+        const complaint = await this.complaintService.findById(id);
+        if (!complaint) throw new NotFoundException('Complaint not found');
+
+        const message = {
+            type: 'text',
+            text: `📌 เรื่องร้องเรียนใหม่ (จากฟอร์ม)
+🧾 ID: ${complaint.id}
+👤 ผู้แจ้ง: ${complaint.lineUserId}
+📝 รายละเอียด: ${complaint.description}
+📎 แนบรูป: ${complaint.imageBefore}`,
+        };
+
+        await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, message);
+        return { message: 'ส่งข้อความแจ้งไปยังกลุ่มแล้ว' };
     }
 
     async updateComplaintStatus(id: string, status: string) {
