@@ -25,6 +25,7 @@ export class LineService {
     private async processEvents(events: any[]) {
         for (const event of events) {
             const lineUserId = event.source?.userId;
+            console.log('🪵 LINE Event Received:', JSON.stringify(event, null, 2));
 
             if (event.type === 'message' && event.message.type === 'text') {
                 const description = event.message.text;
