@@ -24,8 +24,9 @@ export class LineService {
 
     private async processEvents(events: any[]) {
         for (const event of events) {
-            const lineUserId = event.source?.userId;
             console.log('🪵 LINE Event Received:', JSON.stringify(event, null, 2));
+
+            const lineUserId = event.source?.userId;
 
             if (event.type === 'message' && event.message.type === 'text') {
                 const description = event.message.text;
@@ -34,6 +35,11 @@ export class LineService {
                     lineUserId,
                     description,
                     imageBefore: 'https://via.placeholder.com/400x300.png?text=รอ+แนบรูป',
+                });
+
+                await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, {
+                    type: 'text',
+                    text: `📌 เรื่องร้องเรียนใหม่\nจาก: ${lineUserId}\nเนื้อหา: ${description}`,
                 });
             }
 
@@ -76,6 +82,11 @@ export class LineService {
                         description: 'ภาพจากผู้ใช้ LINE',
                         imageBefore: imageUrl,
                     });
+
+                    await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, {
+                        type: 'text',
+                        text: `📌 เรื่องร้องเรียนใหม่ (แนบภาพ)\nจาก: ${lineUserId}`,
+                    });
                 } catch (err) {
                     console.error('❌ Failed to upload image:', err.message);
                     if (err.response) {
@@ -85,5 +96,21 @@ export class LineService {
                 }
             }
         }
+    }
+
+    async pushMessageToGroup(groupId: string, message: any) {
+        const headers = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`,
+        };
+
+        await axios.post(
+            'https://api.line.me/v2/bot/message/push',
+            {
+                to: groupId,
+                messages: [message],
+            },
+            { headers },
+        );
     }
 }
