@@ -111,11 +111,7 @@ export class LineService {
 
         const message = {
             type: 'text',
-            text: `📌 เรื่องร้องเรียนใหม่ (จากฟอร์ม)
-🧾 ID: ${complaint.id}
-👤 ผู้แจ้ง: ${complaint.lineUserId}
-📝 รายละเอียด: ${complaint.description}
-📎 แนบรูป: ${complaint.imageBefore}`,
+            text: `📌 เรื่องร้องเรียนใหม่ (จากฟอร์ม)\n🧾 ID: ${complaint.id}\n👤 ผู้แจ้ง: ${complaint.lineUserId}\n📝 รายละเอียด: ${complaint.description}\n📍 ตำแหน่ง: ${complaint.location || 'ไม่ระบุ'}\n📎 รูป: ${complaint.imageBefore}`,
         };
 
         await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, message);
