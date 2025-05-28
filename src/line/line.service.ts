@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import axios from 'axios';
 import { StorageService } from '../storage/storage.service';
 import { ComplaintStatus } from '@prisma/client';
+import * as path from 'path';
 
 @Injectable()
 export class LineService {
@@ -146,7 +147,8 @@ export class LineService {
         let imageUrl: string | undefined;
         if (file) {
             const buffer = file.buffer;
-            const filename = `after-${randomUUID()}.jpg`;
+            const extension = path.extname(file.originalname) || '.jpg';
+            const filename = `after-${randomUUID()}${extension}`;
             imageUrl = await this.storageService.uploadImage(buffer, filename);
         }
         await this.complaintService.updateImageAfter(id, imageUrl);
