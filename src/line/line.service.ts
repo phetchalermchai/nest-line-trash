@@ -146,7 +146,7 @@ export class LineService {
                                             text: 'เปิดใน Google Maps',
                                             flex: 5,
                                             size: 'sm',
-                                            color: '#666666',
+                                            color: '#155dfc',
                                             action: {
                                                 type: 'uri',
                                                 label: 'action',
@@ -154,7 +154,8 @@ export class LineService {
                                                 altUri: {
                                                     desktop: mapUrl
                                                 }
-                                            }
+                                            },
+                                            decoration: 'underline'
                                         }
                                     ]
                                 },
@@ -340,7 +341,7 @@ export class LineService {
                                             text: 'เปิดใน Google Maps',
                                             flex: 5,
                                             size: 'sm',
-                                            color: '#666666',
+                                            color: '#155dfc',
                                             action: {
                                                 type: 'uri',
                                                 label: 'action',
@@ -348,7 +349,8 @@ export class LineService {
                                                 altUri: {
                                                     desktop: mapUrl
                                                 }
-                                            }
+                                            },
+                                            decoration: 'underline'
                                         }
                                     ]
                                 },
@@ -503,14 +505,15 @@ export class LineService {
                                             type: 'text',
                                             text: 'เปิดใน Google Maps',
                                             size: 'sm',
-                                            color: '#666666',
+                                            color: '#155dfc',
                                             flex: 5,
                                             action: {
                                                 type: 'uri',
                                                 label: 'action',
                                                 uri: mapUrl,
                                                 altUri: { desktop: mapUrl }
-                                            }
+                                            },
+                                            decoration: 'underline'
                                         }
                                     ]
                                 },
@@ -651,13 +654,14 @@ export class LineService {
                                             text: 'เปิดใน Google Maps',
                                             flex: 5,
                                             size: 'sm',
-                                            color: '#666666',
+                                            color: '#155dfc',
                                             action: {
                                                 type: 'uri',
                                                 label: 'action',
                                                 uri: mapUrl,
                                                 altUri: { desktop: mapUrl }
-                                            }
+                                            },
+                                            decoration: 'underline'
                                         }
                                     ]
                                 },
@@ -692,7 +696,7 @@ export class LineService {
                                     align: 'center'
                                 }
                             ],
-                            margin: 'lg'
+                            margin: 'xl'
                         }
                     ]
                 },
