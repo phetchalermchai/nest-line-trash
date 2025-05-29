@@ -10,4 +10,14 @@ export class LineController {
     async notifyGroup(@Param('id') id: string) {
         return this.lineService.notifyGroupAboutComplaint(id);
     }
+
+    @Post('/webhook/line/complaints/:id/image-after')
+    @UseInterceptors(FileInterceptor('images'))
+    uploadAfterImage(
+        @Param('id') id: string,
+        @UploadedFile() file: Express.Multer.File,
+        @Body('message') message: string,
+    ) {
+        return this.lineService.uploadImageAfter(id, file, message);
+    }
 }
