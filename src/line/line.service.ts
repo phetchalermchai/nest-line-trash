@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ComplaintService } from '../complaint/complaint.service';
 import { StorageService } from '../storage/storage.service';
 import axios from 'axios';
-// import { ComplaintStatus } from '@prisma/client';
-// import * as path from 'path';
-// import { randomUUID } from 'crypto';
+import { ComplaintStatus } from '@prisma/client';
+import * as path from 'path';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class LineService {
@@ -57,7 +57,7 @@ export class LineService {
               style: 'secondary',
               action: {
                 type: 'uri',
-                label: '🛠 รายงานผลการดำเนินการ',
+                label: '📌 แจ้งผลการดำเนินงาน',
                 uri: `https://your-site.com/admin/complaints/${c.id}/report`,
               },
             },
@@ -118,7 +118,7 @@ export class LineService {
               action: {
                 type: 'uri',
                 label: '📄 รายละเอียดเพิ่มเติม',
-                uri: `https://next-line-trash.vercel.app/complaints/${c.id}`,
+                uri: `https://your-site.com/complaints/${c.id}`,
               },
             },
           ],
