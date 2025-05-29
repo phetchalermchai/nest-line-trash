@@ -49,7 +49,7 @@ export class LineService {
               action: {
                 type: 'uri',
                 label: '📄 รายละเอียดเพิ่มเติม',
-                uri: `https://your-site.com/admin/complaints/${c.id}`,
+                uri: `https://next-line-trash.vercel.app/admin/complaints/${c.id}`,
               },
             },
             {
@@ -58,7 +58,7 @@ export class LineService {
               action: {
                 type: 'uri',
                 label: '📌 แจ้งผลการดำเนินงาน',
-                uri: `https://your-site.com/admin/complaints/${c.id}/report`,
+                uri: `https://next-line-trash.vercel.app/admin/complaints/${c.id}/report`,
               },
             },
           ],
@@ -118,7 +118,7 @@ export class LineService {
               action: {
                 type: 'uri',
                 label: '📄 รายละเอียดเพิ่มเติม',
-                uri: `https://your-site.com/complaints/${c.id}`,
+                uri: `https://next-line-trash.vercel.app/complaints/${c.id}`,
               },
             },
           ],
