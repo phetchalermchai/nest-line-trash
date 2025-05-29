@@ -17,14 +17,15 @@ export class LineService {
         const c = await this.complaintService.findById(id);
         if (!c) throw new NotFoundException('Complaint not found');
 
+        // 1. ข้อความหลักส่งเข้า group
         const textMsg = {
             type: 'text',
             text: `📌 เรื่องร้องเรียนใหม่\n🧾 ID: ${c.id}\n👤 ผู้แจ้ง: ${c.lineUserId}\n📝: ${c.description}\n📍: ${c.location || 'ไม่ระบุ'}`,
         };
 
         const urls = c.imageBefore.split(',').filter((u) => u.trim());
-
         const messages: any[] = [textMsg];
+
         urls.forEach((url) => {
             messages.push({
                 type: 'image',
@@ -33,8 +34,18 @@ export class LineService {
             });
         });
 
+        // ✅ ส่งเข้า LINE group
         await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, messages);
-        return { message: 'ส่งข้อความเข้า group เรียบร้อย' };
+
+        // ✅ ตอบกลับผู้แจ้งว่าได้รับเรื่องแล้ว
+        await this.pushMessageToUser(c.lineUserId, [
+            {
+                type: 'text',
+                text: `📬 ระบบได้รับเรื่องร้องเรียนของคุณแล้ว ขอบคุณมากครับ 🙏\nหมายเลขอ้างอิง: ${c.id}`,
+            },
+        ]);
+
+        return { message: 'ส่งข้อความเข้า group และตอบกลับผู้แจ้งเรียบร้อย' };
     }
 
     async updateComplaintStatus(id: string, status: string) {
