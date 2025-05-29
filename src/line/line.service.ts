@@ -473,7 +473,7 @@ export class LineService {
                                     spacing: 'sm',
                                     contents: [
                                         { type: 'text', text: 'ผู้แจ้ง', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: lineDisplayName, color: '#666666', size: 'sm', wrap: true, flex: 5 }
+                                        { type: 'text', text: c.lineDisplayName, color: '#666666', size: 'sm', wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
