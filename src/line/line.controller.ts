@@ -10,18 +10,4 @@ export class LineController {
     async notifyGroup(@Param('id') id: string) {
         return this.lineService.notifyGroupAboutComplaint(id);
     }
-
-    @Patch('complaints/:id/status')
-    updateStatus(@Param('id') id: string, @Body('status') status: string) {
-        return this.lineService.updateComplaintStatus(id, status);
-    }
-
-    @Post('complaints/:id/image-after')
-    @UseInterceptors(FileInterceptor('image'))
-    uploadImageAfter(
-        @Param('id') id: string,
-        @UploadedFile() file?: Express.Multer.File,
-    ) {
-        return this.lineService.uploadImageAfter(id, file);
-    }
 }

@@ -8,6 +8,8 @@ export class ComplaintService {
 
     async createComplaint(data: {
         lineUserId: string;
+        lineDisplayName?: string;
+        phone?: string;
         description: string;
         imageBefore: string;
         location?: string;
@@ -15,6 +17,8 @@ export class ComplaintService {
         return this.prisma.complaint.create({
             data: {
                 lineUserId: data.lineUserId,
+                lineDisplayName: data.lineDisplayName,
+                phone: data.phone,
                 description: data.description,
                 imageBefore: data.imageBefore,
                 location: data.location,

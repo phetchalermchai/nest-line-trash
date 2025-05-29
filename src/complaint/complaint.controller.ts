@@ -5,13 +5,12 @@ import {
     Post,
     Put,
     UploadedFiles,
-    UploadedFile,
     UseInterceptors,
     BadRequestException,
 } from '@nestjs/common';
 import { ComplaintService } from './complaint.service';
 import { StorageService } from '../storage/storage.service';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
 
 @Controller('complaints')
@@ -28,11 +27,12 @@ export class ComplaintController {
         @Body()
         body: {
             lineUserId: string;
+            lineDisplayName?: string;
+            phone?: string;
             description: string;
             location?: string;
         },
     ) {
-        // ✅ ตรวจว่ามีรูปไหม
         if (!files || files.length === 0) {
             throw new BadRequestException('ต้องแนบรูปอย่างน้อย 1 รูป');
         }
@@ -53,17 +53,5 @@ export class ComplaintController {
     @Put(':id/done')
     markDone(@Param('id') id: string, @Body() body: { imageAfter: string }) {
         return this.complaintService.markAsDone(id, body.imageAfter);
-    }
-
-    @Post('upload')
-    @UseInterceptors(FileInterceptor('file'))
-    async uploadImage(@UploadedFile() file: Express.Multer.File) {
-        if (!file) {
-            throw new BadRequestException('Missing file');
-        }
-
-        const filename = `upload-${randomUUID()}.jpg`;
-        const url = await this.storageService.uploadImage(file.buffer, filename);
-        return { url };
     }
 }
