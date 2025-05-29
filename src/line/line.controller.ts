@@ -6,11 +6,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class LineController {
     constructor(private readonly lineService: LineService) { }
 
-    @Post()
-    handleWebhook(@Req() req: any) {
-        return this.lineService.handleWebhook(req.body);
-    }
-
     @Put(':id/notify')
     async notifyGroup(@Param('id') id: string) {
         return this.lineService.notifyGroupAboutComplaint(id);
