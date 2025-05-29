@@ -2,6 +2,7 @@ import {
     Body,
     Controller,
     Param,
+    Get,
     Post,
     Put,
     UploadedFiles,
@@ -48,6 +49,11 @@ export class ComplaintController {
             ...body,
             imageBefore: imageUrls.join(','),
         });
+    }
+
+    @Get(':id')
+    findById(@Param('id') id: string) {
+        return this.complaintService.findById(id);
     }
 
     @Put(':id/done')
