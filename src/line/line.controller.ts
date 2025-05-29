@@ -11,7 +11,7 @@ export class LineController {
         return this.lineService.notifyGroupAboutComplaint(id);
     }
 
-    @Post('/webhook/line/complaints/:id/image-after')
+    @Post('complaints/:id/image-after')
     @UseInterceptors(FileInterceptor('images'))
     uploadAfterImage(
         @Param('id') id: string,
