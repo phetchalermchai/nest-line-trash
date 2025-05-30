@@ -4,6 +4,7 @@ import { ComplaintModule } from './complaint/complaint.module';
 import { LineModule } from './line/line.module';
 import { PrismaModule } from './prisma/prisma.module';
 // import { StorageModule } from './storage/storage.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ComplaintModule,
     LineModule,
     PrismaModule,
+    DashboardModule,
     // StorageModule,
   ],
 })
