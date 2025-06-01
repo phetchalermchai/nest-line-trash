@@ -5,6 +5,7 @@ import { LineModule } from './line/line.module';
 import { PrismaModule } from './prisma/prisma.module';
 // import { StorageModule } from './storage/storage.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
@@ -15,5 +16,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
     DashboardModule,
     // StorageModule,
   ],
+  providers: [JwtStrategy],
 })
 export class AppModule {}
