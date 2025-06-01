@@ -4,6 +4,7 @@ import {
   Param,
   Get,
   Post,
+  UseGuards,
   UploadedFiles,
   UseInterceptors,
   BadRequestException,
@@ -12,6 +13,9 @@ import { ComplaintService } from './complaint.service';
 import { StorageService } from '../storage/storage.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('complaints')
 export class ComplaintController {
@@ -21,6 +25,8 @@ export class ComplaintController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @UseInterceptors(FilesInterceptor('images'))
   async create(
     @UploadedFiles() files: Express.Multer.File[],
@@ -56,6 +62,8 @@ export class ComplaintController {
   }
 
   @Post(':id/image-after')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @UseInterceptors(FilesInterceptor('images'))
   async uploadImageAfter(
     @Param('id') id: string,

@@ -1,8 +1,13 @@
-import { Controller, Post, Patch, Put, Param, Body, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, UseGuards, Put, Param, Body, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { LineService } from './line.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('webhook/line')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 export class LineController {
     constructor(private readonly lineService: LineService) { }
 
