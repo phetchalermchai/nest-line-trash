@@ -6,8 +6,6 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
 @Controller('webhook/line')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class LineController {
     constructor(private readonly lineService: LineService) { }
 
@@ -17,6 +15,8 @@ export class LineController {
     }
 
     @Post('complaints/:id/image-after')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
     @UseInterceptors(FileInterceptor('images'))
     uploadAfterImage(
         @Param('id') id: string,
