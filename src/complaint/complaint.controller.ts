@@ -4,10 +4,14 @@ import {
   Param,
   Get,
   Post,
+  Put,
+  Delete,
+  Query,
   UseGuards,
   UploadedFiles,
   UseInterceptors,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ComplaintService } from './complaint.service';
 import { StorageService } from '../storage/storage.service';
@@ -16,13 +20,14 @@ import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { ComplaintStatus } from '@prisma/client';
 
 @Controller('complaints')
 export class ComplaintController {
   constructor(
     private readonly complaintService: ComplaintService,
     private readonly storageService: StorageService,
-  ) {}
+  ) { }
 
   @Post()
   @UseInterceptors(FilesInterceptor('images'))
@@ -54,6 +59,28 @@ export class ComplaintController {
     });
   }
 
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async findAll(
+    @Query('search') search?: string,
+    @Query('status') status?: ComplaintStatus,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    const shouldPaginate = page !== undefined && limit !== undefined;
+    return this.complaintService.findAllWithFilter({
+      search,
+      status,
+      startDate,
+      endDate,
+      page: shouldPaginate ? Number(page) : undefined,
+      limit: shouldPaginate ? Number(limit) : undefined,
+    });
+  }
+
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.complaintService.findById(id);
@@ -80,5 +107,44 @@ export class ComplaintController {
       imageUrls.join(','),
       body.message,
     );
+  }
+
+  @Delete(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
+  async deleteComplaint(@Param('id') id: string) {
+    const deleted = await this.complaintService.deleteOne(id);
+    if (!deleted) {
+      throw new NotFoundException('ไม่พบรายการร้องเรียน');
+    }
+    return { message: 'ลบเรียบร้อยแล้ว' };
+  }
+
+  @Post("bulk")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
+  async deleteMany(@Body('ids') ids: string[]) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      throw new BadRequestException('กรุณาส่ง array ของ ID');
+    }
+    await this.complaintService.deleteMany(ids);
+    return { message: `ลบ ${ids.length} รายการเรียบร้อย` };
+  }
+
+  @Post("undo-delete")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
+  async undoDelete(@Body() data: any) {
+    return this.complaintService.restoreComplaint(data);
+  }
+
+  @Put(':id')
+  @Roles('admin')
+  async updateComplaint(@Param('id') id: string, @Body() data: any) {
+    const updated = await this.complaintService.updateComplaint(id, data);
+    if (!updated) {
+      throw new NotFoundException('ไม่พบรายการร้องเรียน');
+    }
+    return updated;
   }
 }
