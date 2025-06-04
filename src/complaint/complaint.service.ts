@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ComplaintStatus, Prisma } from '@prisma/client';
+import { Complaint, ComplaintStatus, Prisma } from '@prisma/client';
+import { randomUUID } from 'crypto';
+import { StorageService } from 'src/storage/storage.service';
+import axios from 'axios';
 
 @Injectable()
 export class ComplaintService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private storage: StorageService) { }
 
   async createComplaint(data: {
     lineUserId: string;
@@ -114,36 +117,128 @@ export class ComplaintService {
     };
   }
 
-  async deleteOne(id: string) {
+  async deleteOne(id: string): Promise<boolean> {
     const found = await this.prisma.complaint.findUnique({ where: { id } });
-    if (!found) return null;
-    return this.prisma.complaint.delete({ where: { id } });
+    if (!found) return false;
+
+    // ลบรูปภาพที่เกี่ยวข้อง (imageBefore + imageAfter)
+    const allImageUrls = [
+      ...(found.imageBefore?.split(",") || []),
+      ...(found.imageAfter?.split(",") || []),
+    ];
+
+    for (const url of allImageUrls) {
+      try {
+        await this.storage.deleteImage(url);
+      } catch (err) {
+        console.error("ลบภาพล้มเหลว:", url, err);
+        // ดำเนินการลบต่อไปแม้บางไฟล์จะลบไม่ได้
+      }
+    }
+
+    // ลบข้อมูลจากฐานข้อมูล
+    await this.prisma.complaint.delete({ where: { id } });
+    return true;
   }
 
-  async deleteMany(ids: string[]) {
-    return this.prisma.complaint.deleteMany({ where: { id: { in: ids } } });
+  async deleteMany(ids: string[]): Promise<void> {
+    const complaints = await this.prisma.complaint.findMany({
+      where: { id: { in: ids } },
+    });
+
+    for (const complaint of complaints) {
+      const imageUrls = [
+        ...(complaint.imageBefore?.split(',') || []),
+        ...(complaint.imageAfter?.split(',') || []),
+      ];
+
+      for (const url of imageUrls) {
+        try {
+          await this.storage.deleteImage(url);
+        } catch (err) {
+          console.warn(`ลบภาพล้มเหลว: ${url}`, err);
+        }
+      }
+    }
+
+    await this.prisma.complaint.deleteMany({
+      where: { id: { in: ids } },
+    });
   }
 
   async restoreComplaint(data: any) {
-    return this.prisma.complaint.create({
-      data: {
-        ...data,
-        id: data.id,
-        createdAt: new Date(data.createdAt),
-        updatedAt: new Date(data.updatedAt),
-      },
+  return this.prisma.complaint.create({
+    data: {
+      ...data,
+      id: data.id,
+      imageBefore: "",
+      imageAfter: "",
+      createdAt: new Date(data.createdAt),
+      updatedAt: new Date(data.updatedAt),
+    },
+  });
+}
+
+  async updateComplaint(id: string, data: any): Promise<Complaint | null> {
+    const found = await this.prisma.complaint.findUnique({ where: { id } });
+    if (!found) return null;
+
+    const updateData: any = {
+      phone: data.phone,
+      description: data.description,
+      message: data.message,
+      status: data.status,
+      location: data.location,
+      updatedAt: new Date(),
+    };
+
+    // === Helper ฟังก์ชัน ===
+    const handleImageUpdate = async (
+      field: "imageBefore" | "imageAfter",
+      files: Express.Multer.File[] | undefined,
+      oldValue: string | null | undefined
+    ): Promise<string> => {
+      const oldUrls = oldValue?.split(",") ?? [];
+      const keepUrls = (data[field]?.split(",") ?? []).filter((url: string) =>
+        oldUrls.includes(url)
+      );
+
+      const uploadedUrls: string[] = [];
+      if (files?.length) {
+        for (const file of files) {
+          const ext = file.originalname.split(".").pop();
+          const filename = `complaint-${id}-${randomUUID()}.${ext}`;
+          const url = await this.storage.uploadImage(file.buffer, filename);
+          uploadedUrls.push(url);
+        }
+      }
+
+      const deleteUrls = oldUrls.filter((url) => !keepUrls.includes(url));
+      for (const url of deleteUrls) {
+        await this.storage.deleteImage(url);
+      }
+
+      return [...keepUrls, ...uploadedUrls].join(",");
+    };
+
+    // === จัดการรูปภาพ ===
+    updateData.imageBefore = await handleImageUpdate(
+      "imageBefore",
+      data.imageBeforeFiles,
+      found.imageBefore
+    );
+
+    updateData.imageAfter = await handleImageUpdate(
+      "imageAfter",
+      data.imageAfterFiles,
+      found.imageAfter
+    );
+
+    // === อัปเดตฐานข้อมูล ===
+    return this.prisma.complaint.update({
+      where: { id },
+      data: updateData,
     });
   }
 
-  async updateComplaint(id: string, data: any) {
-    const found = await this.prisma.complaint.findUnique({ where: { id } });
-    if (!found) return null;
-    return this.prisma.complaint.update({
-      where: { id },
-      data: {
-        ...data,
-        updatedAt: new Date(),
-      },
-    });
-  }
 }

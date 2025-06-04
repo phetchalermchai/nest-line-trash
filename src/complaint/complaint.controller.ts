@@ -15,12 +15,13 @@ import {
 } from '@nestjs/common';
 import { ComplaintService } from './complaint.service';
 import { StorageService } from '../storage/storage.service';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { ComplaintStatus } from '@prisma/client';
+import { UpdateComplaintDto } from './dto/update-complaint.dto';
 
 @Controller('complaints')
 export class ComplaintController {
@@ -139,12 +140,24 @@ export class ComplaintController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  async updateComplaint(@Param('id') id: string, @Body() data: any) {
-    const updated = await this.complaintService.updateComplaint(id, data);
-    if (!updated) {
-      throw new NotFoundException('ไม่พบรายการร้องเรียน');
-    }
-    return updated;
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'imageBeforeFiles', maxCount: 5 },
+      { name: 'imageAfterFiles', maxCount: 5 },
+    ]),
+  )
+  async updateComplaint(
+    @Param('id') id: string,
+    @Body() data: UpdateComplaintDto,
+    @UploadedFiles()
+    files: { imageBeforeFiles?: Express.Multer.File[]; imageAfterFiles?: Express.Multer.File[] }
+  ) {
+    return this.complaintService.updateComplaint(id, {
+      ...data,
+      imageBeforeFiles: files.imageBeforeFiles || [],
+      imageAfterFiles: files.imageAfterFiles || [],
+    });
   }
 }
