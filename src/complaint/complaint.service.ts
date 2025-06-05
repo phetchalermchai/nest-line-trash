@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Complaint, ComplaintStatus, Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { StorageService } from 'src/storage/storage.service';
-import axios from 'axios';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class ComplaintService {
