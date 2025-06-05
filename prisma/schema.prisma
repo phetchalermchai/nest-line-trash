@@ -18,6 +18,7 @@ model Complaint {
   location       String?
   status         ComplaintStatus @default(PENDING)
   message        String?
+  notifiedAt      DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

@@ -4,6 +4,8 @@ import { StorageService } from '../storage/storage.service';
 import axios from 'axios';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
+import { Complaint } from '@prisma/client';
+
 
 @Injectable()
 export class LineService {
@@ -12,18 +14,14 @@ export class LineService {
         private storageService: StorageService,
     ) { }
 
-    async notifyGroupAboutComplaint(id: string) {
-        const c = await this.complaintService.findById(id);
-        if (!c) throw new NotFoundException('Complaint not found');
-
+    private buildGroupFlex(c: Complaint, type: "ใหม่" | "ค้าง") {
         const lineDisplayName = c.lineDisplayName || c.lineUserId;
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
-            : 'https://www.google.com/maps';
-
-        const flexMessage = {
+            : "https://www.google.com/maps";
+        return {
             type: 'flex',
-            altText: '📌 เรื่องร้องเรียนใหม่',
+            altText: `📌 เรื่องร้องเรียน(${type})`,
             contents: {
                 type: 'bubble',
                 body: {
@@ -32,7 +30,7 @@ export class LineService {
                     contents: [
                         {
                             type: 'text',
-                            text: '📌 เรื่องร้องเรียน (ใหม่)',
+                            text: `📌 เรื่องร้องเรียน (${type})`,
                             weight: 'bold',
                             size: 'xl'
                         },
@@ -212,11 +210,15 @@ export class LineService {
                     flex: 0
                 }
             }
-        };
+        }
+    };
 
-        await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [flexMessage]);
-
-        const userMessage = {
+    private buildUserFlex(c: Complaint ) {
+        const lineDisplayName = c.lineDisplayName || c.lineUserId;
+        const mapUrl = c.location
+            ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
+            : "https://www.google.com/maps";
+        return {
             type: 'flex',
             altText: '📬 ระบบได้รับเรื่องร้องเรียนของคุณแล้ว',
             contents: {
@@ -415,11 +417,30 @@ export class LineService {
                     flex: 0
                 }
             }
-        };
+        }
+    };
 
-        await this.pushMessageToUser(c.lineUserId, [userMessage]);
+    async notifyNewComplaint(id: string) {
+        const c = await this.complaintService.findById(id);
+        if (!c) throw new NotFoundException('Complaint not found');
+
+        const flex = this.buildGroupFlex(c, "ใหม่");
+        const userMsg = this.buildUserFlex(c);
+
+        await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [flex]);
+        await this.pushMessageToUser(c.lineUserId, [userMsg]);
 
         return { message: 'ส่งข้อความเข้า group และตอบกลับผู้แจ้งเรียบร้อย' };
+    }
+
+    async notifyReminderComplaint(id: string) {
+        const c = await this.complaintService.findById(id);
+        if (!c) throw new NotFoundException("Complaint not found");
+
+        const flex = this.buildGroupFlex(c, "ค้าง");
+        await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [flex]);
+
+        return { message: "แจ้งเตือนซ้ำสำเร็จ" };
     }
 
     async uploadImageAfter(id: string, file?: Express.Multer.File, message?: string) {
