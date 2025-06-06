@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ComplaintService } from '../complaint/complaint.service';
 import { StorageService } from '../storage/storage.service';
+import { PrismaService } from '../prisma/prisma.service';
 import axios from 'axios';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
@@ -12,9 +13,10 @@ export class LineService {
     constructor(
         private complaintService: ComplaintService,
         private storageService: StorageService,
+        private prisma: PrismaService
     ) { }
 
-    private buildGroupFlex(c: Complaint, type: "ใหม่" | "ค้าง") {
+    private buildGroupFlex(c: Complaint, type: string = "ใหม่") {
         const lineDisplayName = c.lineDisplayName || c.lineUserId;
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
@@ -213,7 +215,7 @@ export class LineService {
         }
     };
 
-    private buildUserFlex(c: Complaint ) {
+    private buildUserFlex(c: Complaint) {
         const lineDisplayName = c.lineDisplayName || c.lineUserId;
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
@@ -437,8 +439,27 @@ export class LineService {
         const c = await this.complaintService.findById(id);
         if (!c) throw new NotFoundException("Complaint not found");
 
-        const flex = this.buildGroupFlex(c, "ค้าง");
+        const now = new Date();
+
+        if (c.notifiedAt) {
+            const diff = now.getTime() - new Date(c.notifiedAt).getTime();
+            const diffDays = diff / (1000 * 60 * 60 * 24);
+
+            if (diffDays < 1) {
+                throw new BadRequestException("แจ้งเตือนซ้ำได้วันละ 1 ครั้ง");
+            }
+        }
+
+        const created = new Date(c.createdAt);
+        const diffCreatedDays = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+        const flex = this.buildGroupFlex(c, `ค้าง ${diffCreatedDays} วัน`);
+
         await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [flex]);
+
+        await this.prisma.complaint.update({
+            where: { id },
+            data: { notifiedAt: now }
+        });
 
         return { message: "แจ้งเตือนซ้ำสำเร็จ" };
     }
