@@ -456,7 +456,7 @@ export class LineService {
 
         const created = new Date(c.createdAt);
         const diffCreatedDays = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
-        const flex = this.buildGroupFlex(c, `ค้าง ${diffCreatedDays} วัน`);
+        const flex = this.buildGroupFlex(c, `${diffCreatedDays} วัน`);
 
         await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [flex]);
 

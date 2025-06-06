@@ -206,7 +206,7 @@ export class ComplaintService {
       if (files?.length) {
         for (const file of files) {
           const ext = file.originalname.split(".").pop();
-          const filename = `complaint-${id}-${randomUUID()}.${ext}`;
+          const filename = `before-${id}-${randomUUID()}.${ext}`;
           const url = await this.storage.uploadImage(file.buffer, filename);
           uploadedUrls.push(url);
         }
