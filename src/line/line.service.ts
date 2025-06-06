@@ -450,6 +450,10 @@ export class LineService {
             }
         }
 
+        if (c.status === "DONE") {
+            throw new BadRequestException("ไม่สามารถแจ้งเตือนได้ เนื่องจากเรื่องนี้ดำเนินการเสร็จแล้ว");
+        }
+
         const created = new Date(c.createdAt);
         const diffCreatedDays = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
         const flex = this.buildGroupFlex(c, `ค้าง ${diffCreatedDays} วัน`);
@@ -464,18 +468,35 @@ export class LineService {
         return { message: "แจ้งเตือนซ้ำสำเร็จ" };
     }
 
-    async uploadImageAfter(id: string, file?: Express.Multer.File, message?: string) {
-        let imageUrl: string | undefined;
-
-        if (file) {
-            const ext = path.extname(file.originalname) || '.jpg';
-            const filename = `after-${randomUUID()}${ext}`;
-            imageUrl = await this.storageService.uploadImage(file.buffer, filename);
+    async uploadImageAfter(id: string, files?: Express.Multer.File[], message?: string) {
+        if (!message || message.trim() === "") {
+            throw new BadRequestException("จำเป็นต้องระบุข้อความสรุปผล");
         }
 
-        await this.complaintService.updateImageAfter(id, imageUrl);
         const c = await this.complaintService.findById(id);
-        if (!c || !c.lineUserId) return;
+        if (!c) throw new NotFoundException("Complaint not found");
+
+        const uploadedUrls: string[] = [];
+
+        if (files && files.length > 0) {
+            const uploadPromises = files.map(async (file) => {
+                const ext = path.extname(file.originalname) || '.jpg';
+                const filename = `after-${randomUUID()}${ext}`;
+                const imageUrl = await this.storageService.uploadImage(file.buffer, filename);
+                uploadedUrls.push(imageUrl);
+            });
+            await Promise.all(uploadPromises);
+        }
+
+        await this.prisma.complaint.update({
+            where: { id },
+            data: {
+                message,
+                status: 'DONE',
+                notifiedAt: new Date(),
+                ...(uploadedUrls.length > 0 ? { imageAfter: uploadedUrls.join(",") } : {})
+            }
+        });
 
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
@@ -765,7 +786,10 @@ export class LineService {
 
         await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [resultFlex]);
 
-        return { message: 'อัปเดตและแจ้งเรียบร้อย', ...(imageUrl && { imageUrl }) };
+        return {
+            message: 'อัปเดตและแจ้งเรียบร้อย',
+            ...(uploadedUrls.length > 0 ? { imageUrls: uploadedUrls } : {})
+        };
     }
 
     private async pushMessageToGroup(groupId: string, messages: any[]) {

@@ -87,29 +87,6 @@ export class ComplaintController {
     return this.complaintService.findById(id);
   }
 
-  @Post(':id/image-after')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
-  @UseInterceptors(FilesInterceptor('images'))
-  async uploadImageAfter(
-    @Param('id') id: string,
-    @UploadedFiles() files: Express.Multer.File[],
-    @Body() body: { message?: string },
-  ) {
-    const imageUrls = await Promise.all(
-      files.map(async (file) => {
-        const filename = `complaint-${randomUUID()}.jpg`;
-        return await this.storageService.uploadImage(file.buffer, filename);
-      }),
-    );
-
-    return this.complaintService.updateImageAfter(
-      id,
-      imageUrls.join(','),
-      body.message,
-    );
-  }
-
   @Delete(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("admin")

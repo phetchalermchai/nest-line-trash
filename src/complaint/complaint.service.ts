@@ -36,13 +36,13 @@ export class ComplaintService {
     });
   }
 
-  async updateImageAfter(id: string, imageAfter?: string, message?: string) {
+  async updateImageAfter(id: string, imageAfter?: string) {
     return this.prisma.complaint.update({
       where: { id },
       data: {
-        ...(imageAfter && { imageAfter }),
-        ...(message && { message }),
-        status: ComplaintStatus.DONE,
+        imageAfter: imageAfter ?? undefined,
+        status: "DONE",
+        message: undefined,
       },
     });
   }
@@ -166,17 +166,17 @@ export class ComplaintService {
   }
 
   async restoreComplaint(data: any) {
-  return this.prisma.complaint.create({
-    data: {
-      ...data,
-      id: data.id,
-      imageBefore: "",
-      imageAfter: "",
-      createdAt: new Date(data.createdAt),
-      updatedAt: new Date(data.updatedAt),
-    },
-  });
-}
+    return this.prisma.complaint.create({
+      data: {
+        ...data,
+        id: data.id,
+        imageBefore: "",
+        imageAfter: "",
+        createdAt: new Date(data.createdAt),
+        updatedAt: new Date(data.updatedAt),
+      },
+    });
+  }
 
   async updateComplaint(id: string, data: any): Promise<Complaint | null> {
     const found = await this.prisma.complaint.findUnique({ where: { id } });

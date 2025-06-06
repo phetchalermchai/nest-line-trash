@@ -1,6 +1,6 @@
-import { Controller, Post, UseGuards, Put, Param, Body, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, UseGuards, Put, Param, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { LineService } from './line.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -30,12 +30,12 @@ export class LineController {
     @Post('complaints/:id/image-after')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('admin')
-    @UseInterceptors(FileInterceptor('images'))
-    uploadAfterImage(
+    @UseInterceptors(FilesInterceptor('images'))
+    async uploadAfterImages(
         @Param('id') id: string,
-        @UploadedFile() file: Express.Multer.File,
+        @UploadedFiles() files: Express.Multer.File[],
         @Body('message') message: string,
     ) {
-        return this.lineService.uploadImageAfter(id, file, message);
+        return this.lineService.uploadImageAfter(id, files, message);
     }
 }
