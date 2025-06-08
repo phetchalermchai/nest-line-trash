@@ -198,9 +198,9 @@ export class ComplaintService {
       oldValue: string | null | undefined
     ): Promise<string> => {
       const oldUrls = oldValue?.split(",") ?? [];
-      const keepUrls = (data[field]?.split(",") ?? []).filter((url: string) =>
-        oldUrls.includes(url)
-      );
+      const keepUrls = (data[field]?.split(",") ?? [])
+        .map((s: string) => s.trim())
+        .filter((url: string) => url && oldUrls.includes(url));
 
       const uploadedUrls: string[] = [];
       if (files?.length) {
@@ -217,7 +217,9 @@ export class ComplaintService {
         await this.storage.deleteImage(url);
       }
 
-      return [...keepUrls, ...uploadedUrls].join(",");
+      return [...keepUrls, ...uploadedUrls]
+        .filter(Boolean)
+        .join(",");
     };
 
     // === จัดการรูปภาพ ===
