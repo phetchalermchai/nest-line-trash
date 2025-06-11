@@ -31,7 +31,7 @@ export class ComplaintController {
   ) { }
 
   @Post()
-  @UseInterceptors(FilesInterceptor('images'))
+  @UseInterceptors(FilesInterceptor('imageBeforeFiles'))
   async create(
     @UploadedFiles() files: Express.Multer.File[],
     @Body()
