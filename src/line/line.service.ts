@@ -33,9 +33,10 @@ export class LineService {
         };
 
         const thaiDate = new Date(c.createdAt).toLocaleString("th-TH", {
-            day: "2-digit",
-            month: "long",
+            timeZone: "Asia/Bangkok",
             year: "numeric",
+            month: "long",
+            day: "2-digit",
             hour: "2-digit",
             minute: "2-digit",
             hour12: false
@@ -73,7 +74,7 @@ export class LineService {
                         },
                         {
                             type: "text",
-                            text: thaiDate,
+                            text: `${thaiDate} น.`,
                             size: "xs",
                             align: "center",
                             color: "#aaaaaa"
@@ -178,7 +179,8 @@ export class LineService {
                                                 altUri: {
                                                     desktop: mapUrl
                                                 }
-                                            }
+                                            },
+                                            decoration: "underline"
                                         }
                                     ]
                                 },
@@ -257,9 +259,10 @@ export class LineService {
         };
 
         const thaiDate = new Date(c.createdAt).toLocaleString("th-TH", {
-            day: "2-digit",
-            month: "long",
+            timeZone: "Asia/Bangkok",
             year: "numeric",
+            month: "long",
+            day: "2-digit",
             hour: "2-digit",
             minute: "2-digit",
             hour12: false
@@ -297,7 +300,7 @@ export class LineService {
                         },
                         {
                             type: "text",
-                            text: thaiDate,
+                            text: `${thaiDate} น.`,
                             size: "xs",
                             align: "center",
                             color: "#aaaaaa"
@@ -402,7 +405,8 @@ export class LineService {
                                                 altUri: {
                                                     desktop: mapUrl
                                                 }
-                                            }
+                                            },
+                                            decoration: "underline"
                                         }
                                     ]
                                 },
@@ -577,14 +581,15 @@ export class LineService {
                         },
                         {
                             type: "text",
-                            text: new Date(c.updatedAt || c.createdAt).toLocaleString("th-TH", {
-                                day: "2-digit",
-                                month: "long",
+                            text: `${new Date(c.updatedAt || c.createdAt).toLocaleString("th-TH", {
+                                timeZone: "Asia/Bangkok",
                                 year: "numeric",
+                                month: "long",
+                                day: "2-digit",
                                 hour: "2-digit",
                                 minute: "2-digit",
                                 hour12: false
-                            }),
+                            })} น.`,
                             size: "xs",
                             align: "center",
                             color: "#aaaaaa"
@@ -747,14 +752,15 @@ export class LineService {
                         },
                         {
                             type: "text",
-                            text: new Date(c.updatedAt || c.createdAt).toLocaleString("th-TH", {
-                                day: "2-digit",
-                                month: "long",
+                            text: `${new Date(c.updatedAt || c.createdAt).toLocaleString("th-TH", {
+                                timeZone: "Asia/Bangkok",
                                 year: "numeric",
+                                month: "long",
+                                day: "2-digit",
                                 hour: "2-digit",
                                 minute: "2-digit",
                                 hour12: false
-                            }),
+                            })} น.`,
                             size: "xs",
                             align: "center",
                             color: "#aaaaaa"
