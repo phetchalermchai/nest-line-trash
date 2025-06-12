@@ -83,7 +83,7 @@ export class DashboardService {
             take: limit,
             select: {
                 id: true,
-                lineDisplayName: true,
+                reporterName: true,
                 createdAt: true,
                 status: true,
             },
