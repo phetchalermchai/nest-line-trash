@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import axios from 'axios';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
-import { Complaint } from '@prisma/client';
+import { Complaint, ComplaintStatus } from '@prisma/client';
 
 
 @Injectable()
@@ -21,161 +21,185 @@ export class LineService {
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
             : "https://www.google.com/maps";
+
+        const statusColor: Record<ComplaintStatus, string> = {
+            PENDING: "#efb100",
+            DONE: "#3bb273",
+        };
+
+        const statusLabel: Record<ComplaintStatus, string> = {
+            PENDING: "รอดำเนินการ",
+            DONE: "เสร็จสิ้น",
+        };
+
+        const thaiDate = new Date(c.createdAt).toLocaleString("th-TH", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        });
+
         return {
-            type: 'flex',
-            altText: `📌 เรื่องร้องเรียน(${type})`,
+            type: "flex",
+            altText: `📌 เรื่องร้องเรียน - (${type})`,
             contents: {
-                type: 'bubble',
+                type: "bubble",
                 body: {
-                    type: 'box',
-                    layout: 'vertical',
+                    type: "box",
+                    layout: "vertical",
                     contents: [
                         {
-                            type: 'text',
-                            text: `📌 เรื่องร้องเรียน (${type})`,
-                            weight: 'bold',
-                            size: 'xl'
+                            type: "image",
+                            url: "https://upload.wikimedia.org/wikipedia/commons/f/f6/Seal_of_Nonthaburi.jpg",
+                            size: "sm"
                         },
                         {
-                            type: 'box',
-                            layout: 'vertical',
-                            margin: 'lg',
-                            spacing: 'sm',
+                            type: "text",
+                            text: `เรื่องร้องเรียน - (${type})`,
+                            weight: "bold",
+                            size: "lg",
+                            align: "center",
+                            margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: `รหัสอ้างอิง: #${c.id.slice(-6).toUpperCase()}`,
+                            size: "sm",
+                            weight: "bold",
+                            align: "center",
+                            margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: thaiDate,
+                            size: "xs",
+                            align: "center",
+                            color: "#aaaaaa"
+                        },
+                        {
+                            type: "separator",
+                            margin: "lg"
+                        },
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            margin: "lg",
+                            spacing: "sm",
                             contents: [
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'ID',
-                                            color: '#aaaaaa',
-                                            size: 'sm',
+                                            type: "text",
+                                            text: "ผู้แจ้ง",
+                                            color: "#aaaaaa",
+                                            size: "sm",
                                             flex: 2
                                         },
                                         {
-                                            type: 'text',
-                                            text: c.id,
-                                            wrap: true,
-                                            color: '#666666',
-                                            size: 'sm',
-                                            flex: 5
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
-                                    contents: [
-                                        {
-                                            type: 'text',
-                                            text: 'ผู้แจ้ง',
-                                            color: '#aaaaaa',
-                                            size: 'sm',
-                                            flex: 2
-                                        },
-                                        {
-                                            type: 'text',
+                                            type: "text",
                                             text: lineDisplayName,
                                             wrap: true,
-                                            color: '#666666',
-                                            size: 'sm',
+                                            color: "#666666",
+                                            size: "sm",
                                             flex: 5
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'เบอร์',
-                                            color: '#aaaaaa',
-                                            size: 'sm',
+                                            type: "text",
+                                            text: "เบอร์",
+                                            color: "#aaaaaa",
+                                            size: "sm",
                                             flex: 2
                                         },
                                         {
-                                            type: 'text',
-                                            text: c.phone || 'ไม่ระบุ',
+                                            type: "text",
+                                            text: c.phone || "ไม่ระบุ",
                                             wrap: true,
-                                            color: '#666666',
-                                            size: 'sm',
+                                            color: "#666666",
+                                            size: "sm",
                                             flex: 5
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'รายละเอียด',
-                                            color: '#aaaaaa',
-                                            size: 'sm',
+                                            type: "text",
+                                            text: "รายละเอียด",
+                                            color: "#aaaaaa",
+                                            size: "sm",
                                             flex: 2
                                         },
                                         {
-                                            type: 'text',
+                                            type: "text",
                                             text: c.description,
                                             wrap: true,
-                                            color: '#666666',
-                                            size: 'sm',
+                                            color: "#666666",
+                                            size: "sm",
                                             flex: 5
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'พิกัด',
-                                            size: 'sm',
-                                            color: '#aaaaaa',
+                                            type: "text",
+                                            text: "พิกัด",
+                                            size: "sm",
+                                            color: "#aaaaaa",
                                             flex: 2
                                         },
                                         {
-                                            type: 'text',
-                                            text: 'เปิดใน Google Maps',
+                                            type: "text",
+                                            text: "เปิดใน Google Maps",
                                             flex: 5,
-                                            size: 'sm',
-                                            color: '#155dfc',
+                                            size: "sm",
+                                            color: "#155dfc",
                                             action: {
-                                                type: 'uri',
-                                                label: 'action',
+                                                type: "uri",
+                                                label: "action",
                                                 uri: mapUrl,
                                                 altUri: {
                                                     desktop: mapUrl
                                                 }
-                                            },
-                                            decoration: 'underline'
+                                            }
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'สถานะ',
+                                            type: "text",
+                                            text: "สถานะ",
                                             flex: 2,
-                                            size: 'sm',
-                                            color: '#aaaaaa'
+                                            size: "sm",
+                                            color: "#aaaaaa"
                                         },
                                         {
-                                            type: 'text',
-                                            text: 'รอดำเนินการ',
+                                            type: "text",
+                                            text: statusLabel[c.status],
                                             flex: 5,
-                                            size: 'sm',
-                                            color: '#666666'
+                                            size: "sm",
+                                            color: statusColor[c.status],
+                                            weight: "bold"
                                         }
                                     ]
                                 }
@@ -184,27 +208,27 @@ export class LineService {
                     ]
                 },
                 footer: {
-                    type: 'box',
-                    layout: 'vertical',
-                    spacing: 'sm',
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
                     contents: [
                         {
-                            type: 'button',
-                            style: 'primary',
-                            height: 'sm',
+                            type: "button",
+                            style: "primary",
+                            height: "sm",
                             action: {
-                                type: 'uri',
-                                label: 'ดูรายละเอียด',
-                                uri: `${process.env.WEB_BASE_URL}/admin/complaints/${c.id}`
+                                type: "uri",
+                                label: "ดูรายละเอียด",
+                                uri: `${process.env.WEB_BASE_URL}/complaints/${c.id}`
                             }
                         },
                         {
-                            type: 'button',
-                            style: 'secondary',
-                            height: 'sm',
+                            type: "button",
+                            style: "secondary",
+                            height: "sm",
                             action: {
-                                type: 'uri',
-                                label: 'แจ้งผลดำเนินงาน',
+                                type: "uri",
+                                label: "แจ้งผลดำเนินงาน",
                                 uri: `${process.env.WEB_BASE_URL}/admin/complaints/${c.id}/report`
                             }
                         }
@@ -212,206 +236,225 @@ export class LineService {
                     flex: 0
                 }
             }
-        }
-    };
+        };
+    }
+
 
     private buildUserFlex(c: Complaint) {
         const lineDisplayName = c.lineDisplayName || c.lineUserId;
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
             : "https://www.google.com/maps";
+
+        const statusLabel: Record<ComplaintStatus, string> = {
+            PENDING: "รอดำเนินการ",
+            DONE: "เสร็จสิ้น",
+        };
+
+        const statusColor: Record<ComplaintStatus, string> = {
+            PENDING: "#efb100",
+            DONE: "#3bb273",
+        };
+
+        const thaiDate = new Date(c.createdAt).toLocaleString("th-TH", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        });
+
         return {
-            type: 'flex',
-            altText: '📬 ระบบได้รับเรื่องร้องเรียนของคุณแล้ว',
+            type: "flex",
+            altText: "📬 ระบบได้รับเรื่องร้องเรียนของคุณแล้ว",
             contents: {
-                type: 'bubble',
+                type: "bubble",
                 body: {
-                    type: 'box',
-                    layout: 'vertical',
+                    type: "box",
+                    layout: "vertical",
                     contents: [
                         {
-                            type: 'text',
-                            text: '📌 เรื่องร้องเรียน',
-                            weight: 'bold',
-                            size: 'xl'
+                            type: "image",
+                            url: "https://upload.wikimedia.org/wikipedia/commons/f/f6/Seal_of_Nonthaburi.jpg",
+                            size: "sm"
                         },
                         {
-                            type: 'box',
-                            layout: 'vertical',
-                            margin: 'lg',
-                            spacing: 'sm',
+                            type: "text",
+                            text: "เรื่องร้องเรียนของคุณ",
+                            weight: "bold",
+                            size: "lg",
+                            align: "center",
+                            margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: `รหัสอ้างอิง: #${c.id.slice(-6).toUpperCase()}`,
+                            size: "sm",
+                            weight: "bold",
+                            align: "center",
+                            margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: thaiDate,
+                            size: "xs",
+                            align: "center",
+                            color: "#aaaaaa"
+                        },
+                        {
+                            type: "separator",
+                            margin: "lg"
+                        },
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            margin: "lg",
+                            spacing: "sm",
                             contents: [
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'ID',
-                                            color: '#aaaaaa',
-                                            size: 'sm',
+                                            type: "text",
+                                            text: "ผู้แจ้ง",
+                                            color: "#aaaaaa",
+                                            size: "sm",
                                             flex: 2
                                         },
                                         {
-                                            type: 'text',
-                                            text: c.id,
-                                            wrap: true,
-                                            color: '#666666',
-                                            size: 'sm',
-                                            flex: 5
-                                        }
-                                    ]
-                                },
-                                {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
-                                    contents: [
-                                        {
-                                            type: 'text',
-                                            text: 'ผู้แจ้ง',
-                                            color: '#aaaaaa',
-                                            size: 'sm',
-                                            flex: 2
-                                        },
-                                        {
-                                            type: 'text',
+                                            type: "text",
                                             text: lineDisplayName,
                                             wrap: true,
-                                            color: '#666666',
-                                            size: 'sm',
+                                            color: "#666666",
+                                            size: "sm",
                                             flex: 5
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'เบอร์',
-                                            color: '#aaaaaa',
-                                            size: 'sm',
+                                            type: "text",
+                                            text: "เบอร์",
+                                            color: "#aaaaaa",
+                                            size: "sm",
                                             flex: 2
                                         },
                                         {
-                                            type: 'text',
-                                            text: c.phone || 'ไม่ระบุ',
+                                            type: "text",
+                                            text: c.phone || "ไม่ระบุ",
                                             wrap: true,
-                                            color: '#666666',
-                                            size: 'sm',
+                                            color: "#666666",
+                                            size: "sm",
                                             flex: 5
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'รายละเอียด',
-                                            color: '#aaaaaa',
-                                            size: 'sm',
+                                            type: "text",
+                                            text: "รายละเอียด",
+                                            color: "#aaaaaa",
+                                            size: "sm",
                                             flex: 2
                                         },
                                         {
-                                            type: 'text',
+                                            type: "text",
                                             text: c.description,
                                             wrap: true,
-                                            color: '#666666',
-                                            size: 'sm',
+                                            color: "#666666",
+                                            size: "sm",
                                             flex: 5
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'พิกัด',
-                                            size: 'sm',
-                                            color: '#aaaaaa',
+                                            type: "text",
+                                            text: "พิกัด",
+                                            size: "sm",
+                                            color: "#aaaaaa",
                                             flex: 2
                                         },
                                         {
-                                            type: 'text',
-                                            text: 'เปิดใน Google Maps',
+                                            type: "text",
+                                            text: "เปิดใน Google Maps",
                                             flex: 5,
-                                            size: 'sm',
-                                            color: '#155dfc',
+                                            size: "sm",
+                                            color: "#155dfc",
                                             action: {
-                                                type: 'uri',
-                                                label: 'action',
+                                                type: "uri",
+                                                label: "action",
                                                 uri: mapUrl,
                                                 altUri: {
                                                     desktop: mapUrl
                                                 }
-                                            },
-                                            decoration: 'underline'
+                                            }
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
                                         {
-                                            type: 'text',
-                                            text: 'สถานะ',
+                                            type: "text",
+                                            text: "สถานะ",
                                             flex: 2,
-                                            size: 'sm',
-                                            color: '#aaaaaa'
+                                            size: "sm",
+                                            color: "#aaaaaa"
                                         },
                                         {
-                                            type: 'text',
-                                            text: 'รอดำเนินการ',
+                                            type: "text",
+                                            text: statusLabel[c.status],
                                             flex: 5,
-                                            size: 'sm',
-                                            color: '#666666'
+                                            size: "sm",
+                                            color: statusColor[c.status],
+                                            weight: "bold"
                                         }
                                     ]
                                 }
                             ]
                         },
                         {
-                            type: 'separator',
-                            margin: 'md'
+                            type: "separator",
+                            margin: "md"
                         },
                         {
-                            type: 'box',
-                            layout: 'baseline',
-                            contents: [
-                                {
-                                    type: 'text',
-                                    text: 'ระบบได้รับเรื่องร้องเรียนของคุณแล้ว',
-                                    wrap: true,
-                                    weight: 'bold',
-                                    align: 'center'
-                                }
-                            ],
-                            margin: 'lg'
+                            type: "text",
+                            text: "ระบบได้รับเรื่องร้องเรียนของคุณแล้ว",
+                            wrap: true,
+                            weight: "bold",
+                            align: "center",
+                            margin: "lg"
                         }
                     ]
                 },
                 footer: {
-                    type: 'box',
-                    layout: 'vertical',
-                    spacing: 'sm',
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
                     contents: [
                         {
-                            type: 'button',
-                            style: 'primary',
-                            height: 'sm',
+                            type: "button",
+                            style: "primary",
+                            height: "sm",
                             action: {
-                                type: 'uri',
-                                label: 'ดูรายละเอียด',
+                                type: "uri",
+                                label: "ดูรายละเอียด",
                                 uri: `${process.env.WEB_BASE_URL}/complaints/${c.id}`
                             }
                         }
@@ -419,8 +462,8 @@ export class LineService {
                     flex: 0
                 }
             }
-        }
-    };
+        };
+    }
 
     async notifyNewComplaint(id: string) {
         const c = await this.complaintService.findById(id);
@@ -503,142 +546,164 @@ export class LineService {
             : 'https://www.google.com/maps';
 
         const userFlex = {
-            type: 'flex',
-            altText: '📮 ผลการดำเนินงานของคุณ',
+            type: "flex",
+            altText: "📮 ผลการดำเนินงานของคุณ",
             contents: {
-                type: 'bubble',
+                type: "bubble",
                 body: {
-                    type: 'box',
-                    layout: 'vertical',
+                    type: "box",
+                    layout: "vertical",
                     contents: [
                         {
-                            type: 'text',
-                            text: '📌 เรื่องร้องเรียน (สำเร็จ)',
-                            weight: 'bold',
-                            size: 'xl'
+                            type: "image",
+                            url: "https://upload.wikimedia.org/wikipedia/commons/f/f6/Seal_of_Nonthaburi.jpg",
+                            size: "sm"
                         },
                         {
-                            type: 'box',
-                            layout: 'vertical',
-                            margin: 'lg',
-                            spacing: 'sm',
+                            type: "text",
+                            text: "เรื่องร้องเรียน (เสร็จสิ้น)",
+                            weight: "bold",
+                            size: "lg",
+                            align: "center",
+                            margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: `รหัสอ้างอิง: #${c.id.slice(-6).toUpperCase()}`,
+                            size: "sm",
+                            weight: "bold",
+                            align: "center",
+                            margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: new Date(c.updatedAt || c.createdAt).toLocaleString("th-TH", {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false
+                            }),
+                            size: "xs",
+                            align: "center",
+                            color: "#aaaaaa"
+                        },
+                        {
+                            type: "separator",
+                            margin: "lg"
+                        },
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            margin: "lg",
+                            spacing: "sm",
                             contents: [
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
-                                        { type: 'text', text: 'ID', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: c.id, color: '#666666', size: 'sm', wrap: true, flex: 5 }
+                                        { type: "text", text: "ผู้แจ้ง", color: "#aaaaaa", size: "sm", flex: 2 },
+                                        { type: "text", text: c.lineDisplayName, color: "#666666", size: "sm", wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
-                                        { type: 'text', text: 'ผู้แจ้ง', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: c.lineDisplayName, color: '#666666', size: 'sm', wrap: true, flex: 5 }
+                                        { type: "text", text: "เบอร์", color: "#aaaaaa", size: "sm", flex: 2 },
+                                        { type: "text", text: c.phone || "ไม่ระบุ", color: "#666666", size: "sm", wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
-                                        { type: 'text', text: 'เบอร์', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: c.phone || 'ไม่ระบุ', color: '#666666', size: 'sm', wrap: true, flex: 5 }
+                                        { type: "text", text: "รายละเอียด", color: "#aaaaaa", size: "sm", flex: 2 },
+                                        { type: "text", text: c.description, color: "#666666", size: "sm", wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
-                                        { type: 'text', text: 'รายละเอียด', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: c.description, color: '#666666', size: 'sm', wrap: true, flex: 5 }
-                                    ]
-                                },
-                                {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    contents: [
-                                        { type: 'text', text: 'พิกัด', size: 'sm', color: '#aaaaaa', flex: 2 },
+                                        { type: "text", text: "พิกัด", size: "sm", color: "#aaaaaa", flex: 2 },
                                         {
-                                            type: 'text',
-                                            text: 'เปิดใน Google Maps',
-                                            size: 'sm',
-                                            color: '#155dfc',
+                                            type: "text",
+                                            text: "เปิดใน Google Maps",
+                                            size: "sm",
+                                            color: "#155dfc",
                                             flex: 5,
                                             action: {
-                                                type: 'uri',
-                                                label: 'action',
+                                                type: "uri",
+                                                label: "map",
                                                 uri: mapUrl,
-                                                altUri: { desktop: mapUrl }
+                                                altUri: {
+                                                    desktop: mapUrl
+                                                }
                                             },
-                                            decoration: 'underline'
+                                            decoration: "underline"
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
-                                        { type: 'text', text: 'สถานะ', size: 'sm', color: '#aaaaaa', flex: 2 },
-                                        { type: 'text', text: 'ดำเนินการเสร็จแล้ว', size: 'sm', color: '#666666', flex: 5 }
+                                        { type: "text", text: "สถานะ", size: "sm", color: "#aaaaaa", flex: 2 },
+                                        {
+                                            type: "text",
+                                            text: "เสร็จสิ้น",
+                                            size: "sm",
+                                            color: "#3bb273",
+                                            weight: "bold",
+                                            flex: 5
+                                        }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
+                                        { type: "text", text: "สรุปผล", size: "sm", color: "#aaaaaa", flex: 2 },
                                         {
-                                            type: 'text',
-                                            text: 'สรุปผล',
-                                            size: 'sm',
-                                            flex: 2,
-                                            color: '#aaaaaa'
-                                        },
-                                        {
-                                            type: 'text',
-                                            text: message || 'ไม่ระบุ',
-                                            flex: 5,
-                                            size: 'sm',
-                                            color: '#666666'
+                                            type: "text",
+                                            text: c.message || "ไม่ระบุ",
+                                            size: "sm",
+                                            color: "#666666",
+                                            wrap: true,
+                                            flex: 5
                                         }
                                     ]
                                 }
                             ]
                         },
-                        { type: 'separator', margin: 'md' },
+                        { type: "separator", margin: "md" },
                         {
-                            type: 'box',
-                            layout: 'baseline',
-                            contents: [
-                                {
-                                    type: 'text',
-                                    text: 'เรื่องร้องเรียนของคุณได้รับการดำเนินการแล้ว',
-                                    weight: 'bold',
-                                    align: 'center',
-                                    wrap: true
-                                }
-                            ],
-                            margin: 'lg'
+                            type: "text",
+                            text: "เรื่องร้องเรียนของคุณได้รับการดำเนินการแล้ว",
+                            weight: "bold",
+                            align: "center",
+                            wrap: true,
+                            margin: "lg"
                         }
                     ]
                 },
                 footer: {
-                    type: 'box',
-                    layout: 'vertical',
-                    spacing: 'sm',
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
                     contents: [
                         {
-                            type: 'button',
-                            style: 'primary',
-                            height: 'sm',
+                            type: "button",
+                            style: "primary",
+                            height: "sm",
                             action: {
-                                type: 'uri',
-                                label: 'ดูรายละเอียด',
+                                type: "uri",
+                                label: "ดูรายละเอียด",
                                 uri: `${process.env.WEB_BASE_URL}/complaints/${c.id}`
                             }
                         }
@@ -651,131 +716,163 @@ export class LineService {
         await this.pushMessageToUser(c.lineUserId, [userFlex]);
 
         const resultFlex = {
-            type: 'flex',
+            type: "flex",
             altText: `📌 เรื่อง ID ${c.id.slice(0, 8)}... ดำเนินการเสร็จแล้ว`,
             contents: {
-                type: 'bubble',
+                type: "bubble",
                 body: {
-                    type: 'box',
-                    layout: 'vertical',
+                    type: "box",
+                    layout: "vertical",
                     contents: [
                         {
-                            type: 'text',
-                            text: '📌 เรื่องร้องเรียน (สำเร็จ)',
-                            weight: 'bold',
-                            size: 'xl'
+                            type: "image",
+                            url: "https://upload.wikimedia.org/wikipedia/commons/f/f6/Seal_of_Nonthaburi.jpg",
+                            size: "sm"
                         },
                         {
-                            type: 'box',
-                            layout: 'vertical',
-                            margin: 'lg',
-                            spacing: 'sm',
+                            type: "text",
+                            text: "เรื่องร้องเรียน (เสร็จสิ้น)",
+                            weight: "bold",
+                            size: "lg",
+                            align: "center",
+                            margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: `รหัสอ้างอิง: #${c.id.slice(-6).toUpperCase()}`,
+                            size: "sm",
+                            weight: "bold",
+                            align: "center",
+                            margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: new Date(c.updatedAt || c.createdAt).toLocaleString("th-TH", {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false
+                            }),
+                            size: "xs",
+                            align: "center",
+                            color: "#aaaaaa"
+                        },
+                        {
+                            type: "separator",
+                            margin: "lg"
+                        },
+                        {
+                            type: "box",
+                            layout: "vertical",
+                            margin: "lg",
+                            spacing: "sm",
                             contents: [
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
-                                        { type: 'text', text: 'ID', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: c.id, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                        { type: "text", text: "ผู้แจ้ง", color: "#aaaaaa", size: "sm", flex: 2 },
+                                        { type: "text", text: c.lineDisplayName || c.lineUserId, color: "#666666", size: "sm", wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
-                                        { type: 'text', text: 'ผู้แจ้ง', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: c.lineDisplayName || c.lineUserId, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                        { type: "text", text: "เบอร์", color: "#aaaaaa", size: "sm", flex: 2 },
+                                        { type: "text", text: c.phone || "ไม่ระบุ", color: "#666666", size: "sm", wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
                                     contents: [
-                                        { type: 'text', text: 'เบอร์', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: c.phone || 'ไม่ระบุ', wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                        { type: "text", text: "รายละเอียด", color: "#aaaaaa", size: "sm", flex: 2 },
+                                        { type: "text", text: c.description, color: "#666666", size: "sm", wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    spacing: 'sm',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
-                                        { type: 'text', text: 'รายละเอียด', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                        { type: 'text', text: c.description, wrap: true, color: '#666666', size: 'sm', flex: 5 }
-                                    ]
-                                },
-                                {
-                                    type: 'box',
-                                    layout: 'baseline',
-                                    contents: [
-                                        { type: 'text', text: 'พิกัด', size: 'sm', color: '#aaaaaa', flex: 2 },
+                                        { type: "text", text: "พิกัด", size: "sm", color: "#aaaaaa", flex: 2 },
                                         {
-                                            type: 'text',
-                                            text: 'เปิดใน Google Maps',
+                                            type: "text",
+                                            text: "เปิดใน Google Maps",
+                                            size: "sm",
+                                            color: "#155dfc",
                                             flex: 5,
-                                            size: 'sm',
-                                            color: '#155dfc',
                                             action: {
-                                                type: 'uri',
-                                                label: 'action',
+                                                type: "uri",
+                                                label: "action",
                                                 uri: mapUrl,
                                                 altUri: { desktop: mapUrl }
                                             },
-                                            decoration: 'underline'
+                                            decoration: "underline"
                                         }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
-                                        { type: 'text', text: 'สถานะ', flex: 2, size: 'sm', color: '#aaaaaa' },
-                                        { type: 'text', text: 'ดำเนินการเสร็จแล้ว', flex: 5, size: 'sm', color: '#666666' }
+                                        { type: "text", text: "สถานะ", size: "sm", color: "#aaaaaa", flex: 2 },
+                                        {
+                                            type: "text",
+                                            text: "เสร็จสิ้น",
+                                            size: "sm",
+                                            color: "#3bb273",
+                                            weight: "bold",
+                                            flex: 5
+                                        }
                                     ]
                                 },
                                 {
-                                    type: 'box',
-                                    layout: 'baseline',
+                                    type: "box",
+                                    layout: "baseline",
                                     contents: [
-                                        { type: 'text', text: 'สรุปผล', flex: 2, size: 'sm', color: '#aaaaaa' },
-                                        { type: 'text', text: message || 'ไม่ระบุ', flex: 5, size: 'sm', color: '#666666' }
+                                        { type: "text", text: "สรุปผล", size: "sm", color: "#aaaaaa", flex: 2 },
+                                        {
+                                            type: "text",
+                                            text: message || "ไม่ระบุ",
+                                            size: "sm",
+                                            color: "#666666",
+                                            wrap: true,
+                                            flex: 5
+                                        }
                                     ]
                                 }
                             ]
                         },
-                        { type: 'separator', margin: 'md' },
+                        { type: "separator", margin: "md" },
                         {
-                            type: 'box',
-                            layout: 'baseline',
-                            contents: [
-                                {
-                                    type: 'text',
-                                    text: 'เรื่องร้องเรียนนี้ดำเนินการแล้ว',
-                                    wrap: true,
-                                    weight: 'bold',
-                                    align: 'center'
-                                }
-                            ],
-                            margin: 'xl'
+                            type: "text",
+                            text: "เรื่องร้องเรียนนี้ได้รับการดำเนินการแล้ว",
+                            wrap: true,
+                            weight: "bold",
+                            align: "center",
+                            margin: "xl"
                         }
                     ]
                 },
                 footer: {
-                    type: 'box',
-                    layout: 'vertical',
-                    spacing: 'sm',
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
                     contents: [
                         {
-                            type: 'button',
-                            style: 'primary',
-                            height: 'sm',
+                            type: "button",
+                            style: "primary",
+                            height: "sm",
                             action: {
-                                type: 'uri',
-                                label: 'ดูรายละเอียด',
-                                uri: `${process.env.WEB_BASE_URL}/admin/complaints/${c.id}`
+                                type: "uri",
+                                label: "ดูรายละเอียด",
+                                uri: `${process.env.WEB_BASE_URL}/complaints/${c.id}`
                             }
                         }
                     ],
