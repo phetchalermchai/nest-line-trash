@@ -9,11 +9,13 @@ generator client {
 
 model Complaint {
   id             String   @id @default(uuid())
-  lineUserId     String
-  lineDisplayName String? // จาก LINE profile
-  phone          String?  // เบอร์โทร
+  source         ComplaintSource @default(LINE)
+  receivedBy     String?
+  reporterName   String?
+  lineUserId     String?
+  phone          String?
   description    String
-  imageBefore    String
+  imageBefore    String?
   imageAfter     String?
   location       String?
   status         ComplaintStatus @default(PENDING)
@@ -23,8 +25,15 @@ model Complaint {
   updatedAt      DateTime @updatedAt
 }
 
-
 enum ComplaintStatus {
   PENDING
   DONE
+}
+
+enum ComplaintSource {
+  LINE
+  FACEBOOK
+  PHONE
+  COUNTER
+  OTHER
 }

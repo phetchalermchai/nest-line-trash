@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Complaint, ComplaintStatus, Prisma } from '@prisma/client';
+import { Complaint, ComplaintStatus, ComplaintSource, Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { StorageService } from '../storage/storage.service';
 
@@ -9,17 +9,21 @@ export class ComplaintService {
   constructor(private prisma: PrismaService, private storage: StorageService) { }
 
   async createComplaint(data: {
-    lineUserId: string;
-    lineDisplayName?: string;
+    source: ComplaintSource;
+    receivedBy?: string;
+    reporterName?: string;
+    lineUserId?: string;
     phone?: string;
     description: string;
-    imageBefore: string;
+    imageBefore?: string;
     location?: string;
   }) {
     return this.prisma.complaint.create({
       data: {
+        source: data.source,
+        receivedBy: data.receivedBy,
+        reporterName: data.reporterName,
         lineUserId: data.lineUserId,
-        lineDisplayName: data.lineDisplayName,
         phone: data.phone,
         description: data.description,
         imageBefore: data.imageBefore,
@@ -72,7 +76,7 @@ export class ComplaintService {
       conditions.push({
         OR: [
           { description: { contains: search, mode: 'insensitive' } },
-          { lineDisplayName: { contains: search, mode: 'insensitive' } },
+          { reporterName: { contains: search, mode: 'insensitive' } },
           { phone: { contains: search, mode: 'insensitive' } },
         ],
       });

@@ -20,7 +20,7 @@ import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { ComplaintStatus } from '@prisma/client';
+import { ComplaintStatus, ComplaintSource } from '@prisma/client';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
 
 @Controller('complaints')
@@ -36,15 +36,18 @@ export class ComplaintController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body()
     body: {
-      lineUserId: string;
-      lineDisplayName?: string;
+      source: ComplaintSource;
+      receivedBy?: string;
+      reporterName?: string;
+      lineUserId?: string;
       phone?: string;
       description: string;
+      imageBefore?: string;
       location?: string;
     },
   ) {
-    if (!files || files.length === 0) {
-      throw new BadRequestException('ต้องแนบรูปอย่างน้อย 1 รูป');
+    if (body.source === 'LINE' && (!files || files.length === 0)) {
+      throw new BadRequestException('กรณีแจ้งผ่าน LINE ต้องแนบรูปอย่างน้อย 1 รูป');
     }
 
     const imageUrls = await Promise.all(
