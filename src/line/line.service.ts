@@ -17,7 +17,7 @@ export class LineService {
     ) { }
 
     private buildGroupFlex(c: Complaint, type: string = "ใหม่") {
-        const lineDisplayName = c.lineDisplayName || c.lineUserId;
+        const lineDisplayName = c.reporterName || c.lineUserId;
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
             : "https://www.google.com/maps";
@@ -243,7 +243,7 @@ export class LineService {
 
 
     private buildUserFlex(c: Complaint) {
-        const lineDisplayName = c.lineDisplayName || c.lineUserId;
+        const lineDisplayName = c.reporterName || c.lineUserId;
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
             : "https://www.google.com/maps";
@@ -472,6 +472,7 @@ export class LineService {
     async notifyNewComplaint(id: string) {
         const c = await this.complaintService.findById(id);
         if (!c) throw new NotFoundException('Complaint not found');
+        if (!c.lineUserId) throw new NotFoundException('Complaint does not have a LINE user ID');
 
         const flex = this.buildGroupFlex(c, "ใหม่");
         const userMsg = this.buildUserFlex(c);
@@ -522,6 +523,7 @@ export class LineService {
 
         const c = await this.complaintService.findById(id);
         if (!c) throw new NotFoundException("Complaint not found");
+        if (!c.lineUserId) throw new NotFoundException('Complaint does not have a LINE user ID');
 
         const uploadedUrls: string[] = [];
 
@@ -610,7 +612,7 @@ export class LineService {
                                     spacing: "sm",
                                     contents: [
                                         { type: "text", text: "ผู้แจ้ง", color: "#aaaaaa", size: "sm", flex: 2 },
-                                        { type: "text", text: c.lineDisplayName, color: "#666666", size: "sm", wrap: true, flex: 5 }
+                                        { type: "text", text: c.reporterName, color: "#666666", size: "sm", wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
@@ -781,7 +783,7 @@ export class LineService {
                                     spacing: "sm",
                                     contents: [
                                         { type: "text", text: "ผู้แจ้ง", color: "#aaaaaa", size: "sm", flex: 2 },
-                                        { type: "text", text: c.lineDisplayName || c.lineUserId, color: "#666666", size: "sm", wrap: true, flex: 5 }
+                                        { type: "text", text: c.reporterName || c.lineUserId, color: "#666666", size: "sm", wrap: true, flex: 5 }
                                     ]
                                 },
                                 {
