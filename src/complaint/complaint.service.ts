@@ -190,29 +190,16 @@ export class ComplaintService {
     }
 
     const updateData: any = {
+      source: data.source,
+      receivedBy: (data.receivedBy ?? "").trim(),
+      reporterName: (data.reporterName ?? "").trim(),
       phone: data.phone,
       description: data.description,
-      message: data.message,
+      message: (data.message ?? "").trim(),
       status: data.status,
       location: data.location,
       updatedAt: new Date(),
     };
-
-    if (data.source) updateData.source = data.source;
-    if (data.receivedBy) updateData.receivedBy = data.receivedBy;
-    if (data.reporterName) updateData.reporterName = data.reporterName;
-
-    if ('message' in data) {
-      updateData.message = data.message?.trim() || "";
-    }
-
-    if ('receivedBy' in data) {
-      updateData.receivedBy = data.receivedBy?.trim() || "";
-    }
-
-    if ('reporterName' in data) {
-      updateData.reporterName = data.reporterName?.trim() || "";
-    }
 
     // === Helper ฟังก์ชัน ===
     const handleImageUpdate = async (
