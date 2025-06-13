@@ -58,6 +58,7 @@ export class ComplaintService {
   async findAllWithFilter({
     search,
     status,
+    source,
     startDate,
     endDate,
     page = 1,
@@ -65,6 +66,7 @@ export class ComplaintService {
   }: {
     search?: string;
     status?: ComplaintStatus;
+    source?: ComplaintSource;
     startDate?: string;
     endDate?: string;
     page?: number;
@@ -84,6 +86,10 @@ export class ComplaintService {
 
     if (status) {
       conditions.push({ status });
+    }
+
+    if (source) {
+      conditions.push({ source });
     }
 
     if (startDate) {

@@ -69,6 +69,7 @@ export class ComplaintController {
   async findAll(
     @Query('search') search?: string,
     @Query('status') status?: ComplaintStatus,
+    @Query('source') source?: ComplaintSource,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('page') page = '1',
@@ -78,6 +79,7 @@ export class ComplaintController {
     return this.complaintService.findAllWithFilter({
       search,
       status,
+      source,
       startDate,
       endDate,
       page: shouldPaginate ? Number(page) : undefined,
