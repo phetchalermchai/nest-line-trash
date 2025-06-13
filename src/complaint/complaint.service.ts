@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Complaint, ComplaintStatus, ComplaintSource, Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
@@ -182,9 +182,12 @@ export class ComplaintService {
     });
   }
 
-  async updateComplaint(id: string, data: any): Promise<Complaint | null> {
+  async updateComplaint(id: string, data: any): Promise<Complaint> {
     const found = await this.prisma.complaint.findUnique({ where: { id } });
-    if (!found) return null;
+    
+    if (!found) {
+      throw new NotFoundException(`ไม่พบรายการร้องเรียนที่มี ID: ${id}`);
+    }
 
     const updateData: any = {
       phone: data.phone,
@@ -194,6 +197,10 @@ export class ComplaintService {
       location: data.location,
       updatedAt: new Date(),
     };
+
+    if (data.source) updateData.source = data.source;
+    if (data.receivedBy) updateData.receivedBy = data.receivedBy;
+    if (data.reporterName) updateData.reporterName = data.reporterName;
 
     // === Helper ฟังก์ชัน ===
     const handleImageUpdate = async (

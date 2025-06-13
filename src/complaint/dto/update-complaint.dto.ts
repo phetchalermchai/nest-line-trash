@@ -1,4 +1,5 @@
 import { IsOptional, IsString, IsEnum } from 'class-validator';
+import { ComplaintStatus, ComplaintSource } from '@prisma/client';
 
 export class UpdateComplaintDto {
   @IsOptional()
@@ -14,8 +15,8 @@ export class UpdateComplaintDto {
   message?: string;
 
   @IsOptional()
-  @IsEnum(['PENDING', 'DONE'])
-  status?: 'PENDING' | 'DONE';
+  @IsEnum(ComplaintStatus)
+  status?: ComplaintStatus;
 
   @IsOptional()
   @IsString()
@@ -28,4 +29,16 @@ export class UpdateComplaintDto {
   @IsOptional()
   @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsEnum(ComplaintSource)
+  source?: ComplaintSource;
+
+  @IsOptional()
+  @IsString()
+  receivedBy?: string;
+
+  @IsOptional()
+  @IsString()
+  reporterName?: string;
 }
