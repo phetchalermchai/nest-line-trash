@@ -184,7 +184,7 @@ export class ComplaintService {
 
   async updateComplaint(id: string, data: any): Promise<Complaint> {
     const found = await this.prisma.complaint.findUnique({ where: { id } });
-    
+
     if (!found) {
       throw new NotFoundException(`ไม่พบรายการร้องเรียนที่มี ID: ${id}`);
     }
@@ -201,6 +201,18 @@ export class ComplaintService {
     if (data.source) updateData.source = data.source;
     if (data.receivedBy) updateData.receivedBy = data.receivedBy;
     if (data.reporterName) updateData.reporterName = data.reporterName;
+
+    if ('message' in data) {
+      updateData.message = data.message?.trim() || "";
+    }
+
+    if ('receivedBy' in data) {
+      updateData.receivedBy = data.receivedBy?.trim() || "";
+    }
+
+    if ('reporterName' in data) {
+      updateData.reporterName = data.reporterName?.trim() || "";
+    }
 
     // === Helper ฟังก์ชัน ===
     const handleImageUpdate = async (
