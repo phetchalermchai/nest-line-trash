@@ -21,13 +21,13 @@ export class ComplaintService {
     return this.prisma.complaint.create({
       data: {
         source: data.source,
-        receivedBy: data.receivedBy,
-        reporterName: data.reporterName,
-        lineUserId: data.lineUserId,
-        phone: data.phone,
+        receivedBy: data.receivedBy ?? '',
+        reporterName: data.reporterName ?? '',
+        lineUserId: data.lineUserId ?? '',
+        phone: data.phone ?? '',
         description: data.description,
-        imageBefore: data.imageBefore,
-        location: data.location,
+        imageBefore: data.imageBefore ?? '',
+        location: data.location ?? '',
         status: ComplaintStatus.PENDING,
       },
     });

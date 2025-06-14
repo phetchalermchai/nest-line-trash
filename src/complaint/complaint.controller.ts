@@ -22,12 +22,15 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { ComplaintStatus, ComplaintSource } from '@prisma/client';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
+import { CreateComplaintDto } from './dto/create-complaint.dto';
+import { LineService } from '../line/line.service';
 
 @Controller('complaints')
 export class ComplaintController {
   constructor(
     private readonly complaintService: ComplaintService,
     private readonly storageService: StorageService,
+    private readonly lineService: LineService,
   ) { }
 
   @Post()
@@ -35,32 +38,37 @@ export class ComplaintController {
   async create(
     @UploadedFiles() files: Express.Multer.File[],
     @Body()
-    body: {
-      source: ComplaintSource;
-      receivedBy?: string;
-      reporterName?: string;
-      lineUserId?: string;
-      phone?: string;
-      description: string;
-      imageBefore?: string;
-      location?: string;
-    },
+    body: CreateComplaintDto,
   ) {
-    if (body.source === 'LINE' && (!files || files.length === 0)) {
-      throw new BadRequestException('กรณีแจ้งผ่าน LINE ต้องแนบรูปอย่างน้อย 1 รูป');
+
+    if (body.source === 'LINE') {
+      if (!body.lineUserId) throw new BadRequestException('LINE: ต้องมี lineUserId');
+      if (!files || files.length === 0) throw new BadRequestException('LINE: ต้องแนบรูป');
+    } else {
+      if (!body.receivedBy) throw new BadRequestException('เจ้าหน้าที่รับเรื่องต้องระบุ receivedBy');
+      if (!body.reporterName) throw new BadRequestException('ต้องระบุชื่อผู้แจ้ง');
     }
 
-    const imageUrls = await Promise.all(
-      files.map(async (file) => {
-        const filename = `complaint-${randomUUID()}.jpg`;
-        return await this.storageService.uploadImage(file.buffer, filename);
-      }),
-    );
+    const imageUrls =
+      files?.length > 0
+        ? await Promise.all(files.map(async (file) => {
+          const filename = `complaint-${randomUUID()}.jpg`;
+          return await this.storageService.uploadImage(file.buffer, filename);
+        }))
+        : [];
 
-    return this.complaintService.createComplaint({
+    const complaint = await this.complaintService.createComplaint({
       ...body,
       imageBefore: imageUrls.join(','),
     });
+
+    if (body.source === 'LINE') {
+      await this.lineService.notifyUserAndGroup(complaint.id);
+    } else {
+      await this.lineService.notifyGroupOnly(complaint.id);
+    }
+
+    return complaint;
   }
 
   @Get()

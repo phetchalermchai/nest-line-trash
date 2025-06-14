@@ -483,6 +483,32 @@ export class LineService {
         return { message: 'ส่งข้อความเข้า group และตอบกลับผู้แจ้งเรียบร้อย' };
     }
 
+    // Notify both user and group
+    async notifyUserAndGroup(id: string) {
+        const c = await this.complaintService.findById(id);
+        if (!c) throw new NotFoundException('Complaint not found');
+        if (!c.lineUserId) throw new BadRequestException('ไม่มี lineUserId');
+
+        const flex = this.buildGroupFlex(c, "ใหม่");
+        const userMsg = this.buildUserFlex(c);
+
+        await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [flex]);
+        await this.pushMessageToUser(c.lineUserId, [userMsg]);
+
+        return { message: 'ส่งเข้า group และแจ้งกลับผู้ใช้ LINE เรียบร้อย' };
+    }
+
+    // Notify only group without user
+    async notifyGroupOnly(id: string) {
+        const c = await this.complaintService.findById(id);
+        if (!c) throw new NotFoundException('Complaint not found');
+
+        const flex = this.buildGroupFlex(c, "ใหม่");
+        await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [flex]);
+
+        return { message: 'ส่งข้อความเข้า group เจ้าหน้าที่เรียบร้อย' };
+    }
+
     async notifyReminderComplaint(id: string) {
         const c = await this.complaintService.findById(id);
         if (!c) throw new NotFoundException("Complaint not found");
