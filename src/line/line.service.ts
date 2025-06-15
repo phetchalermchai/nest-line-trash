@@ -42,6 +42,8 @@ export class LineService {
             hour12: false
         });
 
+        const isLine = c.source === "LINE";
+
         return {
             type: "flex",
             altText: `📌 เรื่องร้องเรียน - (${type})`,
@@ -63,6 +65,13 @@ export class LineService {
                             size: "lg",
                             align: "center",
                             margin: "lg"
+                        },
+                        {
+                            type: "text",
+                            text: `ช่องทาง: ${c.source}`,
+                            size: "sm",
+                            align: "center",
+                            color: "#666666"
                         },
                         {
                             type: "text",
@@ -104,6 +113,28 @@ export class LineService {
                                         {
                                             type: "text",
                                             text: lineDisplayName,
+                                            wrap: true,
+                                            color: "#666666",
+                                            size: "sm",
+                                            flex: 5
+                                        }
+                                    ]
+                                },
+                                !isLine && c.receivedBy && {
+                                    type: "box",
+                                    layout: "baseline",
+                                    spacing: "sm",
+                                    contents: [
+                                        {
+                                            type: "text",
+                                            text: "ผู้รับแจ้ง",
+                                            color: "#aaaaaa",
+                                            size: "sm",
+                                            flex: 2
+                                        },
+                                        {
+                                            type: "text",
+                                            text: c.receivedBy,
                                             wrap: true,
                                             color: "#666666",
                                             size: "sm",
@@ -205,7 +236,7 @@ export class LineService {
                                         }
                                     ]
                                 }
-                            ]
+                            ].filter(Boolean)
                         }
                     ]
                 },
