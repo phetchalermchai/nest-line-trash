@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import axios from 'axios';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
-import { Complaint, ComplaintStatus } from '@prisma/client';
+import { Complaint, ComplaintSource, ComplaintStatus } from '@prisma/client';
 
 
 @Injectable()
@@ -30,6 +30,14 @@ export class LineService {
         const statusLabel: Record<ComplaintStatus, string> = {
             PENDING: "รอดำเนินการ",
             DONE: "เสร็จสิ้น",
+        };
+
+        const sourceColor: Record<ComplaintSource, string> = {
+            LINE: "#00c300",
+            FACEBOOK: "#1877f2",
+            PHONE: "#f59e0b",
+            COUNTER: "#9333ea",
+            OTHER: "#6b7280",
         };
 
         const thaiDate = new Date(c.createdAt).toLocaleString("th-TH", {
@@ -67,11 +75,27 @@ export class LineService {
                             margin: "lg"
                         },
                         {
-                            type: "text",
-                            text: `ช่องทาง: ${c.source}`,
-                            size: "sm",
-                            align: "center",
-                            color: "#666666"
+                            type: "box",
+                            layout: "baseline",
+                            spacing: "sm",
+                            contents: [
+                                {
+                                    type: "text",
+                                    text: "ช่องทาง",
+                                    color: "#aaaaaa",
+                                    size: "sm",
+                                    flex: 2
+                                },
+                                {
+                                    type: "text",
+                                    text: c.source,
+                                    wrap: true,
+                                    color: sourceColor[c.source],
+                                    size: "sm",
+                                    flex: 5,
+                                    weight: "bold"
+                                }
+                            ]
                         },
                         {
                             type: "text",
