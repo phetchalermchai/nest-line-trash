@@ -81,21 +81,23 @@ export class LineService {
                             contents: [
                                 {
                                     type: "text",
-                                    text: "ช่องทาง",
+                                    text: "ช่องทาง:",
                                     color: "#aaaaaa",
                                     size: "sm",
-                                    flex: 2
+                                    flex: 0
                                 },
                                 {
                                     type: "text",
                                     text: c.source,
-                                    wrap: true,
                                     color: sourceColor[c.source],
                                     size: "sm",
-                                    flex: 5,
+                                    margin: "sm",
+                                    flex: 0,
                                     weight: "bold"
                                 }
-                            ]
+                            ],
+                            justifyContent: "center",
+                            alignItems: "center"
                         },
                         {
                             type: "text",
