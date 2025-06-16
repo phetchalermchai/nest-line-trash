@@ -629,6 +629,14 @@ export class LineService {
             }
         });
 
+        const sourceColor: Record<ComplaintSource, string> = {
+            LINE: "#00c300",
+            FACEBOOK: "#1877f2",
+            PHONE: "#f59e0b",
+            COUNTER: "#9333ea",
+            OTHER: "#6b7280",
+        };
+
         const mapUrl = c.location
             ? `https://www.google.com/maps/search/?api=1&query=${c.location}`
             : 'https://www.google.com/maps';
@@ -824,6 +832,31 @@ export class LineService {
                             size: "lg",
                             align: "center",
                             margin: "lg"
+                        },
+                        {
+                            type: "box",
+                            layout: "baseline",
+                            spacing: "sm",
+                            contents: [
+                                {
+                                    type: "text",
+                                    text: "ช่องทาง:",
+                                    color: "#aaaaaa",
+                                    size: "sm",
+                                    flex: 0
+                                },
+                                {
+                                    type: "text",
+                                    text: c.source,
+                                    color: sourceColor[c.source],
+                                    size: "sm",
+                                    margin: "sm",
+                                    flex: 0,
+                                    weight: "bold"
+                                }
+                            ],
+                            justifyContent: "center",
+                            alignItems: "center"
                         },
                         {
                             type: "text",
