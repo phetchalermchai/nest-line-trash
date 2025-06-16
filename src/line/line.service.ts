@@ -606,7 +606,6 @@ export class LineService {
 
         const c = await this.complaintService.findById(id);
         if (!c) throw new NotFoundException("Complaint not found");
-        if (!c.lineUserId) throw new NotFoundException('Complaint does not have a LINE user ID');
 
         const uploadedUrls: string[] = [];
 
@@ -803,7 +802,6 @@ export class LineService {
             }
         };
 
-        await this.pushMessageToUser(c.lineUserId, [userFlex]);
 
         const resultFlex = {
             type: "flex",
@@ -972,6 +970,9 @@ export class LineService {
             }
         };
 
+        if (c.lineUserId) {
+            await this.pushMessageToUser(c.lineUserId, [userFlex]);
+        }
         await this.pushMessageToGroup(process.env.LINE_GROUP_ID!, [resultFlex]);
 
         return {
