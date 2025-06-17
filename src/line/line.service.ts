@@ -775,29 +775,6 @@ export class LineService {
                                             flex: 5
                                         }
                                     ]
-                                },
-                                {
-                                    type: "box",
-                                    layout: "baseline",
-                                    contents: [
-                                        { type: "text", text: "", size: "sm", color: "#aaaaaa", flex: 2 },
-                                        {
-                                            type: "text",
-                                            text: `${new Date(c.updatedAt).toLocaleString("th-TH", {
-                                                timeZone: "Asia/Bangkok",
-                                                year: "numeric",
-                                                month: "long",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                hour12: false
-                                            })} น.`,
-                                            size: "sm",
-                                            color: "#666666",
-                                            wrap: true,
-                                            flex: 5
-                                        }
-                                    ]
                                 }
                             ]
                         },
@@ -992,29 +969,6 @@ export class LineService {
                                         }
                                     ]
                                 },
-                                {
-                                    type: "box",
-                                    layout: "baseline",
-                                    contents: [
-                                        { type: "text", text: "", size: "sm", color: "#aaaaaa", flex: 2 },
-                                        {
-                                            type: "text",
-                                            text: `${new Date(c.updatedAt).toLocaleString("th-TH", {
-                                                timeZone: "Asia/Bangkok",
-                                                year: "numeric",
-                                                month: "long",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                hour12: false
-                                            })} น.`,
-                                            size: "sm",
-                                            color: "#666666",
-                                            wrap: true,
-                                            flex: 5
-                                        }
-                                    ]
-                                }
                             ]
                         },
                         { type: "separator", margin: "md" },
