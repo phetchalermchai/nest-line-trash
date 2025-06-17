@@ -760,7 +760,30 @@ export class LineService {
                                         { type: "text", text: "สรุปผล", size: "sm", color: "#aaaaaa", flex: 2 },
                                         {
                                             type: "text",
-                                            text: c.message || "ไม่ระบุ",
+                                            text: message || "ไม่ระบุ",
+                                            size: "sm",
+                                            color: "#666666",
+                                            wrap: true,
+                                            flex: 5
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: "box",
+                                    layout: "baseline",
+                                    contents: [
+                                        { type: "text", text: "", size: "sm", color: "#aaaaaa", flex: 2 },
+                                        {
+                                            type: "text",
+                                            text: `${new Date(c.updatedAt).toLocaleString("th-TH", {
+                                                timeZone: "Asia/Bangkok",
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "2-digit",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                hour12: false
+                                            })} น.`,
                                             size: "sm",
                                             color: "#666666",
                                             wrap: true,
@@ -929,6 +952,29 @@ export class LineService {
                                         {
                                             type: "text",
                                             text: message || "ไม่ระบุ",
+                                            size: "sm",
+                                            color: "#666666",
+                                            wrap: true,
+                                            flex: 5
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: "box",
+                                    layout: "baseline",
+                                    contents: [
+                                        { type: "text", text: "", size: "sm", color: "#aaaaaa", flex: 2 },
+                                        {
+                                            type: "text",
+                                            text: `${new Date(c.updatedAt).toLocaleString("th-TH", {
+                                                timeZone: "Asia/Bangkok",
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "2-digit",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                hour12: false
+                                            })} น.`,
                                             size: "sm",
                                             color: "#666666",
                                             wrap: true,
