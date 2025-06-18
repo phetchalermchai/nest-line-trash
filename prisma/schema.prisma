@@ -8,21 +8,21 @@ generator client {
 }
 
 model Complaint {
-  id             String   @id @default(uuid())
-  source         ComplaintSource @default(LINE)
-  receivedBy     String?
-  reporterName   String?
-  lineUserId     String?
-  phone          String?
-  description    String
-  imageBefore    String?
-  imageAfter     String?
-  location       String?
-  status         ComplaintStatus @default(PENDING)
-  message        String?
-  notifiedAt      DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id           String          @id @default(uuid())
+  source       ComplaintSource @default(LINE)
+  receivedBy   String?
+  reporterName String?
+  lineUserId   String?
+  phone        String?
+  description  String
+  imageBefore  String?
+  imageAfter   String?
+  location     String?
+  status       ComplaintStatus @default(PENDING)
+  message      String?
+  notifiedAt   DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 }
 
 enum ComplaintStatus {
@@ -36,4 +36,51 @@ enum ComplaintSource {
   PHONE
   COUNTER
   OTHER
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  name      String?
+  role      Role       @default(ADMIN)
+  status    UserStatus @default(PENDING)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  accounts Account[]
+  apiKeys  ApiKey[]
+}
+
+model Account {
+  id                String   @id @default(uuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model ApiKey {
+  id        String    @id @default(uuid())
+  key       String    @unique // เก็บค่า API Key ที่เข้ารหัสแล้ว (hash)
+  userId    String
+  name      String // ตั้งชื่อ key เช่น "สำหรับแอปมือถือ"
+  createdAt DateTime  @default(now())
+  revokedAt DateTime? // ถ้าไม่ได้ใช้งานแล้ว
+  expiresAt DateTime? // หากมีการตั้งวันหมดอายุ
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
 }

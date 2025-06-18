@@ -6,6 +6,10 @@ import { PrismaModule } from './prisma/prisma.module';
 // import { StorageModule } from './storage/storage.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { ApiKeyController } from './api-key/api-key.controller';
+import { ApiKeyService } from './api-key/api-key.service';
+import { UserController } from './user/user.controller';
+import { UserService } from './user/user.service';
 
 @Module({
   imports: [
@@ -16,6 +20,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     DashboardModule,
     // StorageModule,
   ],
-  providers: [JwtStrategy],
+  providers: [JwtStrategy, ApiKeyService, UserService],
+  controllers: [ApiKeyController, UserController],
 })
 export class AppModule {}
