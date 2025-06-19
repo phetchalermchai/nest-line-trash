@@ -2,12 +2,13 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateApiKeyDto } from './dto/create-api-key.dto';
 
 @Injectable()
 export class ApiKeyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
-  async createKey(userId: string, name: string) {
+  async createKey(userId: string, dto: CreateApiKeyDto) {
     const plainKey = randomBytes(32).toString('hex');
     const hashedKey = await bcrypt.hash(plainKey, 10);
 
@@ -15,11 +16,17 @@ export class ApiKeyService {
       data: {
         key: hashedKey,
         userId,
-        name,
+        name: dto.name,
+        expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
       },
     });
 
-    return { id: created.id, name: created.name, apiKey: plainKey };
+    return {
+      id: created.id,
+      name: created.name,
+      apiKey: plainKey,
+      expiresAt: created.expiresAt,
+    };
   }
 
   async getKeys(userId: string) {
@@ -38,6 +45,13 @@ export class ApiKeyService {
     return this.prisma.apiKey.update({
       where: { id },
       data: { revokedAt: new Date() },
+    });
+  }
+
+  async approveUser(id: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { status: 'APPROVED' },
     });
   }
 }

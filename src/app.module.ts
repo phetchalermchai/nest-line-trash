@@ -10,6 +10,11 @@ import { ApiKeyController } from './api-key/api-key.controller';
 import { ApiKeyService } from './api-key/api-key.service';
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
+import { PublicApiController } from './public-api/public-api.controller';
+import { PublicApiService } from './public-api/public-api.service';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,9 +23,10 @@ import { UserService } from './user/user.service';
     LineModule,
     PrismaModule,
     DashboardModule,
+    AuthModule,
     // StorageModule,
   ],
-  providers: [JwtStrategy, ApiKeyService, UserService],
-  controllers: [ApiKeyController, UserController],
+  providers: [JwtStrategy, ApiKeyService, UserService, PublicApiService, AuthService],
+  controllers: [ApiKeyController, UserController, PublicApiController, AuthController],
 })
 export class AppModule {}

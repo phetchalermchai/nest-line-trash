@@ -73,7 +73,7 @@ export class ComplaintController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('ADMIN', 'SUPERADMIN')
   async findAll(
     @Query('search') search?: string,
     @Query('status') status?: ComplaintStatus,
@@ -102,7 +102,7 @@ export class ComplaintController {
 
   @Delete(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles('ADMIN', 'SUPERADMIN')
   async deleteComplaint(@Param('id') id: string) {
     const deleted = await this.complaintService.deleteOne(id);
     if (!deleted) {
@@ -113,7 +113,7 @@ export class ComplaintController {
 
   @Post("bulk")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles('ADMIN', 'SUPERADMIN')
   async deleteMany(@Body('ids') ids: string[]) {
     if (!Array.isArray(ids) || ids.length === 0) {
       throw new BadRequestException('กรุณาส่ง array ของ ID');
@@ -124,14 +124,14 @@ export class ComplaintController {
 
   @Post("undo-delete")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("admin")
+  @Roles('ADMIN', 'SUPERADMIN')
   async undoDelete(@Body() data: any) {
     return this.complaintService.restoreComplaint(data);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('ADMIN', 'SUPERADMIN')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'imageBeforeFiles', maxCount: 5 },

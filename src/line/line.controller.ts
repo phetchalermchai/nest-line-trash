@@ -17,7 +17,7 @@ export class LineController {
 
     @Put(":id/notify-group")
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles("admin")
+    @Roles('ADMIN', 'SUPERADMIN')
     async notifyGroupManual(@Param("id") id: string) {
         const result = await this.lineService.notifyReminderComplaint(id);
         await this.prisma.complaint.update({
@@ -29,7 +29,7 @@ export class LineController {
 
     @Post('complaints/:id/image-after')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('admin')
+    @Roles('ADMIN', 'SUPERADMIN')
     @UseInterceptors(FilesInterceptor('images'))
     async uploadAfterImages(
         @Param('id') id: string,

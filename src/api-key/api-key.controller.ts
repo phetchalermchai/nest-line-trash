@@ -5,12 +5,13 @@ import { ApiKeyService } from './api-key.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { CreateApiKeyDto } from './dto/create-api-key.dto';
 
 @Controller('api-keys')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
 export class ApiKeyController {
-  constructor(private readonly apiKeyService: ApiKeyService) {}
+  constructor(private readonly apiKeyService: ApiKeyService) { }
 
   @Get()
   async getMyKeys(@Req() req) {
@@ -18,12 +19,13 @@ export class ApiKeyController {
   }
 
   @Post()
-  async createKey(@Req() req, @Body('name') name: string) {
-    return this.apiKeyService.createKey(req.user.id, name);
+  async createKey(@Req() req, @Body() dto: CreateApiKeyDto) {
+    return this.apiKeyService.createKey(req.user.id, dto);
   }
 
   @Delete(':id')
   async revokeKey(@Param('id') id: string, @Req() req) {
     return this.apiKeyService.revokeKey(id, req.user.id);
   }
+
 }
