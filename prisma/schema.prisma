@@ -40,7 +40,7 @@ enum ComplaintSource {
 
 model User {
   id        String     @id @default(uuid())
-  email     String     @unique
+  email     String?    @unique
   name      String?
   role      Role       @default(ADMIN)
   status    UserStatus @default(PENDING)
