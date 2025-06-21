@@ -15,6 +15,7 @@ export class AuthController {
         const user = req.user as any;
         const { accessToken, email, role, sub } = user;
         const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
+        console.log('🔁 Redirecting to:', redirectUrl); 
         return res.redirect(redirectUrl);
     }
 
