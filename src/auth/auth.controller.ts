@@ -14,7 +14,7 @@ export class AuthController {
     async googleCallback(@Req() req: Request, @Res() res: Response) {
         const user = req.user as any;
         const { accessToken, email, role, sub } = user;
-        const redirectUrl = `http://localhost:3000/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
+        const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
         return res.redirect(redirectUrl);
     }
 
@@ -31,7 +31,7 @@ export class AuthController {
     async lineCallback(@Req() req: Request, @Res() res: Response) {
         const user = req.user as any;
         const { accessToken, email, role, sub } = user;
-        const redirectUrl = `http://localhost:3000/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
+        const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
         return res.redirect(redirectUrl);
     }
 
@@ -48,7 +48,7 @@ export class AuthController {
     async facebookCallback(@Req() req: Request, @Res() res: Response) {
         const user = req.user as any;
         const { accessToken, email, role, sub } = user;
-        const redirectUrl = `http://localhost:3000/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
+        const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
         return res.redirect(redirectUrl);
     }
 
