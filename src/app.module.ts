@@ -15,6 +15,8 @@ import { PublicApiService } from './public-api/public-api.service';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
+import { MeController } from './me/me.controller';
+import { MeModule } from './me/me.module';
 
 @Module({
   imports: [
@@ -24,9 +26,10 @@ import { AuthModule } from './auth/auth.module';
     PrismaModule,
     DashboardModule,
     AuthModule,
+    MeModule,
     // StorageModule,
   ],
   providers: [JwtStrategy, ApiKeyService, UserService, PublicApiService, AuthService],
-  controllers: [ApiKeyController, UserController, PublicApiController, AuthController],
+  controllers: [ApiKeyController, UserController, PublicApiController, AuthController, MeController],
 })
 export class AppModule {}

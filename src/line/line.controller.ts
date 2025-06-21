@@ -1,9 +1,9 @@
 import { Controller, Post, UseGuards, Put, Param, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { LineService } from './line.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('webhook/line')

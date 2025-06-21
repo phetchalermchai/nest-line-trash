@@ -4,13 +4,16 @@ import { AuthController } from './auth.controller';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { RolesGuard } from './roles.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { LineStrategy } from './strategies/line.strategy';
+import { FacebookStrategy } from './strategies/facebook.strategy';
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '1d' },
     }),
   ],
@@ -18,10 +21,13 @@ import { RolesGuard } from './roles.guard';
   providers: [
     AuthService,
     PrismaService,
+    GoogleStrategy,
+    LineStrategy,        // ✅ เพิ่มตรงนี้
+    FacebookStrategy,
     JwtStrategy,
     JwtAuthGuard,
     RolesGuard,
   ],
   exports: [JwtModule, JwtStrategy, JwtAuthGuard, RolesGuard],
 })
-export class AuthModule {}
+export class AuthModule { }
