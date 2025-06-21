@@ -13,8 +13,9 @@ export class AuthController {
     @UseGuards(AuthGuard('google'))
     async googleCallback(@Req() req: Request, @Res() res: Response) {
         const user = req.user as any;
+        const url = process.env.FRONTEND_URL
         const { accessToken, email, role, sub } = user;
-        const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
+        const redirectUrl = `${url}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
         console.log('🔁 Redirecting to:', redirectUrl); 
         return res.redirect(redirectUrl);
     }
@@ -31,8 +32,9 @@ export class AuthController {
     @UseGuards(AuthGuard('line'))
     async lineCallback(@Req() req: Request, @Res() res: Response) {
         const user = req.user as any;
+        const url = process.env.FRONTEND_URL
         const { accessToken, email, role, sub } = user;
-        const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
+        const redirectUrl = `${url}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
         return res.redirect(redirectUrl);
     }
 
@@ -48,8 +50,9 @@ export class AuthController {
     @UseGuards(AuthGuard('facebook'))
     async facebookCallback(@Req() req: Request, @Res() res: Response) {
         const user = req.user as any;
+        const url = process.env.FRONTEND_URL
         const { accessToken, email, role, sub } = user;
-        const redirectUrl = `${process.env.FRONTEND_URL}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
+        const redirectUrl = `${url}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
         return res.redirect(redirectUrl);
     }
 
