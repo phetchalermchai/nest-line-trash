@@ -22,6 +22,7 @@ export class LineStrategy extends PassportStrategy(Strategy, 'line') {
     refreshToken: string,
     profile: Profile
   ) {
+    console.log('[LINE] profile:', profile);
     const currentUser = req.user as { id: string }; // จาก JwtAuthGuard
     return this.authService.validateOAuthLogin(profile, 'line', currentUser);
   }
