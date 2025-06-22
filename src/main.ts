@@ -7,6 +7,11 @@ import { cookieTokenMiddleware } from './auth/middleware/cookie-token.middleware
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  app.enableCors({
+    origin: ['https://next-line-trash.vercel.app', "http://localhost:3000"],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
   app.use(cookieTokenMiddleware);
   app.use(
     session({
@@ -20,11 +25,6 @@ async function bootstrap() {
       },
     }),
   );
-  app.enableCors({
-    origin: ['https://next-line-trash.vercel.app', "http://localhost:3000"],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
   await app.listen(process.env.PORT ?? 8080);
   console.log(`Server is running on ${process.env.PORT ?? 8080}`);
 }

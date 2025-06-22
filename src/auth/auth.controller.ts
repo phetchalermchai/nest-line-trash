@@ -16,7 +16,7 @@ export class AuthController {
         const url = process.env.FRONTEND_URL
         const { accessToken, email, role, sub } = user;
         const redirectUrl = `${url}/oauth/callback?token=${accessToken}&email=${email}&role=${role}&id=${sub}`;
-        console.log('🔁 Redirecting to:', redirectUrl); 
+        console.log('🔁 Redirecting to:', redirectUrl);
         return res.redirect(redirectUrl);
     }
 
@@ -59,4 +59,11 @@ export class AuthController {
     @Get('link/facebook')
     @UseGuards(JwtAuthGuard, AuthGuard('facebook'))
     linkFacebook() { }
+
+    @Get('debug-token')
+    @UseGuards(JwtAuthGuard)
+    debugToken(@Req() req) {
+        console.log('✅ currentUser:', req.user);
+        return req.user;
+    }
 }

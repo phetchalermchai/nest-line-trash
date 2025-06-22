@@ -13,6 +13,9 @@ export class AuthService {
     const name = profile.displayName;
     const image = profile.photos?.[0]?.value ?? null;
 
+    console.log('[OAuth] currentUser:', currentUser);
+    console.log('[OAuth] Checking account:', provider, providerAccountId);
+
     let user: any = null;
 
     // 1. หา account เดิม
@@ -83,10 +86,6 @@ export class AuthService {
         },
       });
     }
-
-    console.log('[OAuth] currentUser:', currentUser);
-    console.log('[OAuth] Checking account:', provider, providerAccountId);
-
     const payload = {
       sub: user.id,
       email: user.email,
